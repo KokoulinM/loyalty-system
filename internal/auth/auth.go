@@ -1,13 +1,16 @@
 package auth
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 )
 
-var accessTokenSecret = []byte("accessTokenSecret")
-var refreshTokenSecret = []byte("refreshTokenSecret")
+var accessTokenSecret = "accessTokenSecret"
+var refreshTokenSecret = "refreshTokenSecret"
 
 type TokenDetails struct {
 	AccessToken  string
@@ -18,8 +21,8 @@ type TokenDetails struct {
 
 func CreateToken(userID string, email string) (*TokenDetails, error) {
 	td := &TokenDetails{
-		AtExpires: time.Now().Add(time.Minute * time.Duration(1)).Unix(),
-		RtExpires: time.Now().Add(time.Hour * time.Duration(24)).Unix(),
+		AtExpires: time.Now().Add(time.Second * time.Duration(10)).Unix(),
+		RtExpires: time.Now().Add(time.Second - time.Duration(20)).Unix(),
 	}
 
 	atClaims := jwt.MapClaims{
@@ -50,6 +53,8 @@ func CreateToken(userID string, email string) (*TokenDetails, error) {
 	td.AccessToken = at
 	td.RefreshToken = rt
 
+	log.Println("token has been generated")
+
 	return td, nil
 }
 
@@ -61,10 +66,43 @@ func ValidateToken(signedToken string) (*jwt.Token, error) {
 		return nil, err
 	}
 
-	err = token.Claims.Valid()
+	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+		return nil, errors.New("expired token")
+	}
+
+	return token, nil
+}
+
+func RefreshToken(refreshToken string) (*TokenDetails, error) {
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(refreshTokenSecret), nil
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return token, nil
+	if !token.Valid {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if ok && token.Valid {
+		userID := claims["user_id"].(string)
+		email := claims["email"].(string)
+
+		td, err := CreateToken(userID, email)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Println("token has been refreshed")
+
+		return td, nil
+	} else {
+		return nil, errors.New("refresh token expired")
+	}
 }
