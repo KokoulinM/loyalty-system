@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ServerAddress              = ""
+	ServerAddress              = "http://localhost:8080"
 	DataBaseURI                = ""
 	AccrualSystemAddress       = ""
 	AccessTokenSecret          = ""
@@ -44,20 +44,22 @@ func New() Config {
 	}
 
 	if checkExists("a") {
-		flag.StringVar(&cfg.ServerAddress, "a", ServerAddress, "ServerAddress")
+		flag.StringVar(&cfg.ServerAddress, "a", cfg.ServerAddress, "ServerAddress")
 	}
 
 	if checkExists("d") {
-		flag.StringVar(&cfg.DataBaseURI, "d", DataBaseURI, "DataBaseURI")
+		flag.StringVar(&cfg.DataBaseURI, "d", cfg.DataBaseURI, "DataBaseURI")
 	}
 
 	if checkExists("r") {
-		flag.StringVar(&cfg.AccrualSystemAddress, "r", AccrualSystemAddress, "AccrualSystemAddress")
+		flag.StringVar(&cfg.AccrualSystemAddress, "r", cfg.AccrualSystemAddress, "AccrualSystemAddress")
 	}
 
 	tokenConfig := newConfigToken()
 
 	cfg.Token = tokenConfig
+
+	flag.Parse()
 
 	return cfg
 }
