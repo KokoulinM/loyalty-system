@@ -2,31 +2,49 @@ package main
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/migratons"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/database/postgres"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/router"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
 	"github.com/rs/zerolog"
 )
 
 func main() {
-	log := logger.New(zerolog.DebugLevel)
+	logger := logger.New(zerolog.DebugLevel)
 
-	log.Log().Msg("Starting server")
+	logger.Log("Starting server")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	log.Log().Msg("Starting parse configuration")
+	logger.Log("Starting parse configuration")
+
 	cfg := config.New()
 
-	handler := router.New()
-
-	s := server.New(ctx, handler, cfg)
-
-	err := s.Start()
+	db, err := sql.Open("postgres", cfg.DataBaseURI)
+	logger.Log("Finish db connection")
 	if err != nil {
-		panic(err)
+		logger.Fatal(err.Error())
+	}
+	defer db.Close()
+
+	repo := postgres.New(db)
+
+	migratons.Migrations(db, logger)
+
+	handlers := handlers.New(repo, cfg)
+
+	router := router.New(handlers, cfg)
+
+	s := server.New(ctx, router, cfg)
+
+	err = s.Start()
+	if err != nil {
+		logger.Fatal(err.Error())
 	}
 
 	//token, err := auth.CreateToken("1", "", &cfg.Token)
