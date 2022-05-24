@@ -6,6 +6,7 @@ import (
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
 )
 
 type server struct {

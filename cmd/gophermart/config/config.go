@@ -9,7 +9,7 @@ import (
 
 const (
 	ServerAddress              = "http://localhost:8080"
-	DataBaseURI                = ""
+	DataBaseURI                = "user=postgres password=postgres sslmode=disable"
 	AccrualSystemAddress       = ""
 	AccessTokenSecret          = ""
 	RefreshTokenSecret         = ""
