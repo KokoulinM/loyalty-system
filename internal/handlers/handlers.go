@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 )
 
 type Repository interface {
-	AddUser(user models.User) error
+	CreateUser(ctx context.Context, user models.User) error
 }
 
 type Handlers struct {
@@ -45,7 +46,7 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	err = h.repo.AddUser(user)
+	err = h.repo.CreateUser(r.Context(), user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
