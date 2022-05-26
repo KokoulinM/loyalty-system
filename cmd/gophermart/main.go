@@ -49,23 +49,4 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-
-	//token, err := auth.CreateToken("1", "", &cfg.Token)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//for {
-	//	jwt, err := auth.ValidateToken(token.AccessToken, &cfg.Token)
-	//	if err != nil {
-	//		token, err = auth.RefreshToken(token.RefreshToken, &cfg.Token)
-	//		if err != nil {
-	//			panic(err)
-	//		}
-	//	} else {
-	//		fmt.Println(jwt.Raw)
-	//	}
-	//
-	//	time.Sleep(1 * time.Second)
-	//}
 }
