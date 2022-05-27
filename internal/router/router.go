@@ -15,6 +15,7 @@ func New(h *handlers.Handlers, cfg config.Config) *chi.Mux {
 
 	router.Route("/", func(r chi.Router) {
 		router.Post("/api/user/register", h.Register)
+		router.Post("/api/user/login", h.Login)
 	})
 
 	return router
