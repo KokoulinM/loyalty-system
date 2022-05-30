@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/rs/zerolog"
 
@@ -40,11 +41,13 @@ func main() {
 
 	logger.Log("Finish setup db")
 
-	handlers := handlers.New(repo, cfg)
+	handlers := handlers.New(repo, &cfg)
 
-	router := router.New(handlers, cfg)
+	router := router.New(handlers, &cfg)
 
-	s := server.New(ctx, router, cfg)
+	log.Println(cfg)
+
+	s := server.New(ctx, router, &cfg)
 
 	err = s.Start()
 	if err != nil {
