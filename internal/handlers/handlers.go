@@ -23,7 +23,7 @@ type Repository interface {
 
 type Handlers struct {
 	repo Repository
-	cfg  config.Config
+	cfg  *config.Config
 }
 
 type ErrorWithDB struct {
@@ -49,7 +49,7 @@ func NewErrorWithDB(err error, title string) error {
 func New(repo Repository, cfg *config.Config) *Handlers {
 	return &Handlers{
 		repo: repo,
-		cfg:  *cfg,
+		cfg:  cfg,
 	}
 }
 
