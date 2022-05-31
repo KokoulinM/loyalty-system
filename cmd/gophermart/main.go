@@ -3,8 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/rs/zerolog"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
@@ -20,7 +24,9 @@ func main() {
 
 	logger.Log("Starting server")
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	logger.Log("Starting parse configuration")
 
@@ -46,8 +52,30 @@ func main() {
 
 	s := server.New(ctx, router, cfg.ServerAddress)
 
-	err = s.Start()
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		err = s.Start()
+		if err != nil {
+			return err
+		}
+
+		logger.Log("httpServer starting at: " + cfg.ServerAddress)
+
+		return nil
+	})
+
+	select {
+	case <-interrupt:
+		cancel()
+		break
+	case <-ctx.Done():
+		break
+	}
+
+	err = g.Wait()
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Log("server returning an error: " + err.Error())
+		os.Exit(2)
 	}
 }
