@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 )
@@ -14,9 +13,9 @@ type server struct {
 	ctx context.Context
 }
 
-func New(ctx context.Context, handler *chi.Mux, cfg *config.Config) *server {
+func New(ctx context.Context, handler *chi.Mux, addr string) *server {
 	s := &http.Server{
-		Addr:    cfg.ServerAddress,
+		Addr:    addr,
 		Handler: handler,
 	}
 
