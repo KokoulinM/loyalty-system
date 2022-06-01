@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/utils"
 )
@@ -60,23 +60,17 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Register 1")
-
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
 
 	defer r.Body.Close()
 
-	log.Println("Register 2")
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("Register 3")
 
 	if len(body) == 0 {
 		http.Error(w, "the body is missing", http.StatusBadRequest)
@@ -89,13 +83,16 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Register 4")
-
 	newUser, err := h.repo.CreateUser(r.Context(), user)
 	var dbErr *ErrorWithDB
 
 	if errors.As(err, &dbErr) && dbErr.Title == "UniqConstraint" {
 		http.Error(w, err.Error(), http.StatusConflict)
+		return
+	}
+
+	if errors.As(err, &dbErr) && dbErr.Title == "UndefinedTable" {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -189,8 +186,10 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+
 	order := models.Order{
-		UserID: "",
+		UserID: userIDCtx,
 		Number: strconv.Itoa(number),
 		Status: "New",
 	}
