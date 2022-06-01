@@ -53,8 +53,8 @@ func (db *PostgresDatabase) getOrder(ctx context.Context, number string) (*model
 	return order, nil
 }
 
-func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]models.ResponseOrder, error) {
-	var result []models.ResponseOrder
+func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error) {
+	var result []models.ResponseOrderWithAccrual
 
 	query := `SELECT number, status, accrual, uploaded_at FROM orders WHERE user_id=$1 ORDER BY uploaded_at`
 
@@ -64,7 +64,7 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 	}
 
 	for rows.Next() {
-		var order models.ResponseOrder
+		var order models.ResponseOrderWithAccrual
 
 		err := rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.UploadedAt)
 		if err != nil {
