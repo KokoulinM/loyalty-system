@@ -38,7 +38,6 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	defer db.Close()
 
 	repo := postgres.New(db)
 
