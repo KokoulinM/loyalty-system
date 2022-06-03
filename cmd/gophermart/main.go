@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -55,7 +56,7 @@ func main() {
 
 	log.Println(cfg)
 
-	s := server.New(ctx, router, &cfg.ServerAddress)
+	s := server.New(ctx, router, cfg.ServerAddress)
 
 	g, ctx := errgroup.WithContext(ctx)
 
