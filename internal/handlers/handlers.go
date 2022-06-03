@@ -249,7 +249,5 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json; charset=utf-8")
-
 	w.WriteHeader(http.StatusOK)
 }
