@@ -223,8 +223,6 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer r.Body.Close()
-
 	r.Header.Add("Content-Length", "0")
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
@@ -246,7 +244,7 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 
@@ -261,8 +259,6 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	defer r.Body.Close()
 
 	r.Header.Add("Content-Length", "0")
 
@@ -280,7 +276,7 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 
