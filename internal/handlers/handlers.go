@@ -194,7 +194,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	order := models.Order{
 		UserID: userIDCtx,
 		Number: strconv.Itoa(number),
-		Status: "NEW",
+		Status: "New",
 	}
 
 	err = h.repo.CreateOrder(r.Context(), order)
