@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
@@ -15,9 +14,7 @@ type server struct {
 	ctx context.Context
 }
 
-func New(ctx context.Context, handler *chi.Mux, cfg *config.Config) *server {
-	log.Println(cfg)
-
+func New(ctx context.Context, handler *chi.Mux, cfg config.Config) *server {
 	s := &http.Server{
 		Addr:    cfg.ServerAddress,
 		Handler: handler,
