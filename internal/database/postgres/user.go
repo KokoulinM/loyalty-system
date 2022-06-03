@@ -68,3 +68,17 @@ func (db *PostgresDatabase) CheckPassword(ctx context.Context, user models.User)
 
 	return u, nil
 }
+
+func (db *PostgresDatabase) GetBalance(ctx context.Context, userID string) (models.UserBalance, error) {
+	var userBalance models.UserBalance
+
+	query := `SELECT balance, spend FROM users WHERE id=$1`
+
+	row := db.conn.QueryRowContext(ctx, query, userID)
+
+	err := row.Scan(&userBalance.Balance, &userBalance.Spent)
+	if err != nil {
+		return userBalance, err
+	}
+	return userBalance, nil
+}
