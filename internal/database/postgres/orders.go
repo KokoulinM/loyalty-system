@@ -15,6 +15,9 @@ func (db *PostgresDatabase) CreateOrder(ctx context.Context, order models.Order)
 	query := `INSERT INTO orders (user_id, number, status, accrual) VALUES($1, $2, $3, $4)`
 
 	_, err := db.conn.ExecContext(ctx, query, order.UserID, order.Number, order.Status, order.Accrual)
+	if err != nil {
+		return err
+	}
 
 	var pgErr *pq.Error
 
@@ -41,7 +44,7 @@ func (db *PostgresDatabase) CreateOrder(ctx context.Context, order models.Order)
 func (db *PostgresDatabase) getOrder(ctx context.Context, number string) (*models.Order, error) {
 	order := &models.Order{}
 
-	query := `SELECT id, user_id, number, status, uploaded_at, accrual FROM orders WHERE number=$1`
+	query := `SELECT id, user_id, number, status, uploaded_at, accrual FROM orders WHERE numbers=$1`
 
 	row := db.conn.QueryRowContext(ctx, query, number)
 

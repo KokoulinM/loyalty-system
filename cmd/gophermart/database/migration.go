@@ -9,7 +9,7 @@ import (
 )
 
 func RunMigration(databaseDSN string) (bool, error) {
-	m, err := migrate.New("file://cmd/gophermart/database/migration", databaseDSN)
+	m, err := migrate.New("file://internal/database/migration/001_migration.up.sql", databaseDSN)
 	if err != nil {
 		if !errors.Is(err, migrate.ErrNoChange) {
 			return false, err
