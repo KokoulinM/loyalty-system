@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -59,17 +60,23 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Register 1")
+
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
 
 	defer r.Body.Close()
 
+	log.Println("Register 2")
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("Register 3")
 
 	if len(body) == 0 {
 		http.Error(w, "the body is missing", http.StatusBadRequest)
@@ -81,6 +88,8 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("Register 4")
 
 	newUser, err := h.repo.CreateUser(r.Context(), user)
 	var dbErr *ErrorWithDB
