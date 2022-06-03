@@ -66,7 +66,7 @@ func ValidateToken(r *http.Request, cfg *config.ConfigToken) (*jwt.Token, error)
 		return nil, err
 	}
 
-	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
+	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
 		return nil, errors.New("expired token")
 	}
 
