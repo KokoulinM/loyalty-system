@@ -20,7 +20,7 @@ type Repository interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
 	CheckPassword(ctx context.Context, user models.User) (*models.User, error)
 	CreateOrder(ctx context.Context, order models.Order) error
-	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error)
+	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrder, error)
 }
 
 type Handlers struct {
@@ -223,8 +223,6 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-
-	r.Header.Add("Content-Length", "0")
 
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
