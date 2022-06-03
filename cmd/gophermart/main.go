@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/database/postgres"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
@@ -42,10 +42,7 @@ func main() {
 	repo := postgres.New(db)
 
 	logger.Log("Starting setup db")
-	_, err = database.RunMigration(cfg.DataBaseURI)
-	if err != nil {
-
-	}
+	database.Migrations(db, logger)
 
 	logger.Log("Finish setup db")
 

@@ -21,7 +21,7 @@ type TokenDetails struct {
 
 func CreateToken(userID string, cfg config.ConfigToken) (*TokenDetails, error) {
 	td := &TokenDetails{
-		AtExpires: time.Now().Add(time.Minute * time.Duration(cfg.AccessTokenLiveTimeMinutes)).Unix(),
+		AtExpires: time.Now().Add(time.Second * time.Duration(cfg.AccessTokenLiveTimeMinutes)).Unix(),
 		RtExpires: time.Now().Add(time.Second - time.Duration(cfg.RefreshTokenLiveTimeDays)).Unix(),
 	}
 
