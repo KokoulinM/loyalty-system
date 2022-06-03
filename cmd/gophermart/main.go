@@ -11,8 +11,6 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/rs/zerolog"
-
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
@@ -51,9 +49,9 @@ func main() {
 
 	logger.Log("Finish setup db")
 
-	handlers := handlers.New(repo, &cfg)
+	handlers := handlers.New(repo, cfg)
 
-	router := router.New(handlers, &cfg)
+	router := router.New(handlers, cfg)
 
 	s := server.New(ctx, router, cfg.ServerAddress)
 
