@@ -177,7 +177,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	number, err := strconv.Atoi(string(body))
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
