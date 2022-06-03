@@ -15,21 +15,13 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 	router.Use(middleware.Recoverer)
 
 	router.Route("/", func(r chi.Router) {
-		router.Post("/api/user/register", h.Register)
-		router.Post("/api/user/login", h.Login)
-		router.Route("/api/user/orders", func(r chi.Router) {
-			r.Use(middlewares.JWTMiddleware(&cfg.Token))
-			r.Post("/", h.CreateOrder)
-			r.Get("/", h.GetOrders)
-		})
-		router.Route("/api/user/balance", func(r chi.Router) {
-			r.Use(middlewares.JWTMiddleware(&cfg.Token))
-			r.Get("/", h.GetBalance)
-		})
-		router.Route("/api/user/balance/withdraw", func(r chi.Router) {
-			r.Use(middlewares.JWTMiddleware(&cfg.Token))
-			r.Post("/", h.CreateWithdraw)
-		})
+		r.Use(middlewares.JWTMiddleware(&cfg.Token))
+		r.Post("/api/user/register", h.Register)
+		r.Post("/api/user/login", h.Login)
+		r.Post("/api/user/orders", h.CreateOrder)
+		r.Get("/api/user/orders", h.GetOrders)
+		r.Get("/api/user/balance", h.GetBalance)
+		r.Post("/api/user/balance/withdraw", h.CreateWithdraw)
 	})
 
 	return router
