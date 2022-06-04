@@ -5,17 +5,21 @@ import (
 	"time"
 )
 
-type Withdraw struct {
-	ID          string    `json:"id"`
-	UserID      string    `json:"user_id"`
+type WithdrawOrder struct {
 	Order       string    `json:"order"`
-	Status      string    `json:"status"`
-	ProcessedAt time.Time `json:"processed_at"`
 	Sum         float64   `json:"sum"`
+	ProcessedAt time.Time `json:"processed_at"`
 }
 
-func (w Withdraw) MarshalJSON() ([]byte, error) {
-	type WithdrawAlias Withdraw
+type Withdraw struct {
+	ID     string `json:"id"`
+	UserID string `json:"user_id"`
+	Status string `json:"status"`
+	WithdrawOrder
+}
+
+func (w WithdrawOrder) MarshalJSON() ([]byte, error) {
+	type WithdrawAlias WithdrawOrder
 	aliasValue := struct {
 		WithdrawAlias
 		ProcessedAt string `json:"processed_at"`
