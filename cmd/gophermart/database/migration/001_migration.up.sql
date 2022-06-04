@@ -31,3 +31,12 @@ CREATE TABLE IF NOT EXISTS withdrawals (
     processed_at TIMESTAMP,
     sum FLOAT DEFAULT 0
 );
+
+CREATE TABLE jobstore (
+    id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+    type VARCHAR(50),
+    next_time_execute TIMESTAMP,
+    parameters json,
+    count INT,
+    executed BOOL DEFAULT FALSE
+);

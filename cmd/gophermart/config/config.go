@@ -15,6 +15,9 @@ const (
 	RefreshTokenSecret         = ""
 	AccessTokenLiveTimeMinutes = 60
 	RefreshTokenLiveTimeDays   = 7
+	NumOfWorkers               = 10
+	PoolBuffer                 = 1000
+	MaxJobRetryCount           = 5
 )
 
 type Config struct {
@@ -22,6 +25,7 @@ type Config struct {
 	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	DataBase             ConfigDatabase
 	Token                ConfigToken
+	WorkerPool           ConfigWorkerPool
 }
 
 type ConfigToken struct {
@@ -35,6 +39,12 @@ type ConfigDatabase struct {
 	DataBaseURI string `env:"DATABASE_URI"`
 }
 
+type ConfigWorkerPool struct {
+	NumOfWorkers     int `env:"num_of_workers"`
+	PoolBuffer       int `env:"pool_buffer"`
+	MaxJobRetryCount int `env:"max_job_retry_count"`
+}
+
 func New() *Config {
 	dbCfg := ConfigDatabase{
 		DataBaseURI: DataBaseURI,
@@ -42,10 +52,17 @@ func New() *Config {
 
 	tokenConfig := NewConfigToken()
 
+	wpConf := ConfigWorkerPool{
+		NumOfWorkers:     NumOfWorkers,
+		PoolBuffer:       PoolBuffer,
+		MaxJobRetryCount: MaxJobRetryCount,
+	}
+
 	cfg := Config{
 		ServerAddress:        ServerAddress,
 		DataBase:             dbCfg,
 		AccrualSystemAddress: AccrualSystemAddress,
+		WorkerPool:           wpConf,
 	}
 
 	err := env.Parse(&cfg.DataBase)
