@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/database/postgres"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/router"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
 	"github.com/rs/zerolog"
 )
 
@@ -21,7 +23,7 @@ func main() {
 
 	logger.Log("Starting server")
 
-	//ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -56,21 +58,19 @@ func main() {
 
 	log.Println(router)
 
-	//s := server.New(ctx, router, cfg.ServerAddress)
-	//
-	//g, ctx := errgroup.WithContext(ctx)
-	//
-	//go func() error {
-	//	err = s.Start()
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	logger.Log("httpServer starting at: " + cfg.ServerAddress)
-	//
-	//	return nil
-	//}()
-	//
+	s := server.New(ctx, router, cfg.ServerAddress)
+
+	go func() error {
+		err = s.Start()
+		if err != nil {
+			return err
+		}
+
+		logger.Log("httpServer starting at: " + cfg.ServerAddress)
+
+		return nil
+	}()
+
 	//select {
 	//case <-interrupt:
 	//	cancel()
