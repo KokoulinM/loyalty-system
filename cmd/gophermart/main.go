@@ -20,14 +20,14 @@ import (
 func main() {
 	logger := logger.New(zerolog.DebugLevel)
 
-	logger.Log("Starting server")
+	logger.Log("starting server")
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
-	logger.Log("Starting parse configuration")
+	logger.Log("starting parse configuration")
 
 	cfg := config.New()
 
@@ -38,18 +38,18 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 
-	logger.Log("Finish db connection")
+	logger.Log("finish db connection")
 
 	repo := postgres.New(db)
 
-	logger.Log("Starting setup db")
+	logger.Log("starting setup db")
 
 	_, err = database.RunMigration(cfg.DataBase.DataBaseURI)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	logger.Log("Finish setup db")
+	logger.Log("finish setup db")
 
 	handlers := handlers.New(repo, cfg)
 
