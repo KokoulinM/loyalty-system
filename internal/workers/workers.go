@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
+	"github.com/rs/zerolog"
 )
 
 type WorkerPoolJobStore interface {
@@ -29,12 +29,12 @@ type WorkerPool struct {
 	taskStore        *tasks.TaskStore
 	numOfWorkers     int
 	inputCh          chan Job
-	logger           logger.Logger
+	logger           *zerolog.Logger
 	maxJobRetryCount int
 }
 
 func New(jobStore WorkerPoolJobStore, taskStore *tasks.TaskStore, cfg *config.ConfigWorkerPool,
-	logger logger.Logger) *WorkerPool {
+	logger *zerolog.Logger) *WorkerPool {
 	wp := &WorkerPool{
 		jobStore:         jobStore,
 		taskStore:        taskStore,
@@ -51,30 +51,30 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 	for i := 0; i < wp.numOfWorkers; i++ {
 		wg.Add(1)
 		go func(i int) {
-			//wp.logger.Log("Worker #%v start " + i)
+			wp.logger.Log().Msgf("Worker #%v start ", i)
 		outer:
 			for {
 				select {
 				case job := <-wp.inputCh:
 					err := job.Func(ctx)
 					if err != nil {
-						//wp.logger.Fatal("Error on worker #%v: %v\n", i, err.Error())
+						wp.logger.Fatal().Msgf("Error on worker #%v: %v\n", i, err.Error())
 						err = wp.jobStore.IncreaseCounter(ctx, job.ID, job.Count)
 						if err != nil {
-							//wp.log.Errorf("Error with increase job counter with job:%v error:%v", job.ID, err.Error())
+							wp.logger.Error().Msgf("Error with increase job counter with job:%v error:%v", job.ID, err.Error())
 						}
 						continue
 					}
 					err = wp.jobStore.ExecuteJob(ctx, job.ID)
 					if err != nil {
-						//wp.log.Errorf("Error with executing job: %v, error: %v", job.ID, err.Error())
+						wp.logger.Error().Msgf("Error with executing job: %v, error: %v", job.ID, err.Error())
 					}
 				case <-ctx.Done():
 					break outer
 				}
 
 			}
-			//wp.log.Infof("Worker #%v close\n", i)
+			wp.logger.Log().Msgf("Worker #%v close\n", i)
 			wg.Done()
 		}(i)
 	}
@@ -90,12 +90,12 @@ func (wp *WorkerPool) push(task Job) {
 
 func (wp *WorkerPool) scheduler(ctx context.Context) *time.Ticker {
 	ticker := time.NewTicker(time.Second * 5)
-	//wp.log.Info("start scheduler")
+	wp.logger.Log().Msg("start scheduler")
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				//wp.log.Info("ticker tick")
+				wp.logger.Log().Msg("ticker tick")
 				wp.transferTaskToWorkerPool(ctx)
 			case <-ctx.Done():
 				return
@@ -108,7 +108,7 @@ func (wp *WorkerPool) scheduler(ctx context.Context) *time.Ticker {
 func (wp *WorkerPool) transferTaskToWorkerPool(ctx context.Context) {
 	jobs, err := wp.jobStore.GetJobToExecute(ctx, wp.maxJobRetryCount)
 	if err != nil {
-		//wp.log.Errorf("Error occured in getting task in worker pool: %v", err.Error())
+		wp.logger.Error().Msgf("Error occured in getting task in worker pool: %v", err.Error())
 		return
 	}
 	for _, job := range jobs {
@@ -116,18 +116,18 @@ func (wp *WorkerPool) transferTaskToWorkerPool(ctx context.Context) {
 		task, ok := wp.taskStore.MapOfTask[job.Type]
 
 		if !ok {
-			//wp.log.Errorf("Get job of unknown type: %v", job.Type)
+			wp.logger.Error().Msgf("Get job of unknown type: %v", job.Type)
 			continue
 		}
 		parameters := make(map[string]string)
 		err := json.Unmarshal([]byte(job.Parameters), &parameters)
 		if err != nil {
-			//wp.log.Errorf("Error with parce parameters, job_id: %v, err: %v", job.ID, err.Error())
+			wp.logger.Error().Msgf("Error with parce parameters, job_id: %v, err: %v", job.ID, err.Error())
 			continue
 		}
 		function, err := task.CreateFunction(parameters)
 		if err != nil {
-			//wp.log.Errorf("Wrong paramenters for function, job_id: %v, err: %v", job.ID, err.Error())
+			wp.logger.Error().Msgf("Wrong paramenters for function, job_id: %v, err: %v", job.ID, err.Error())
 			continue
 		}
 		jobToPush := Job{
