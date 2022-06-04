@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,13 +27,13 @@ func main() {
 
 	logger.Log(cfg.Token.AccessTokenSecret)
 
-	//db, err := sql.Open("postgres", cfg.DataBase.DataBaseURI)
-	//if err != nil {
-	//	logger.Fatal(err.Error())
-	//}
-	//
-	//logger.Log("Finish db connection")
-	//
+	_, err := sql.Open("postgres", cfg.DataBase.DataBaseURI)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+
+	logger.Log("Finish db connection")
+
 	//repo := postgres.New(db)
 	//
 	//logger.Log("Starting setup db")
