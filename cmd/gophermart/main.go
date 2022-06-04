@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -56,8 +55,6 @@ func main() {
 
 	router := router.New(handlers, cfg)
 
-	log.Println(router)
-
 	s := server.New(ctx, router, cfg.ServerAddress)
 
 	go func() error {
@@ -71,13 +68,13 @@ func main() {
 		return nil
 	}()
 
-	//select {
-	//case <-interrupt:
-	//	cancel()
-	//	break
-	//case <-ctx.Done():
-	//	break
-	//}
+	select {
+	case <-interrupt:
+		cancel()
+		break
+	case <-ctx.Done():
+		break
+	}
 	//
 	//err = g.Wait()
 	//if err != nil {
