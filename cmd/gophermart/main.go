@@ -33,6 +33,12 @@ func main() {
 
 	cfg := config.New()
 
+	logger.Log().Msg("ServerAddress: " + cfg.ServerAddress)
+	logger.Log().Msg("AccrualSystemAddress: " + cfg.AccrualSystemAddress)
+	logger.Log().Msg("DataBase: " + cfg.DataBase.DataBaseURI)
+	logger.Log().Msg("AccessTokenSecret: " + cfg.Token.AccessTokenSecret)
+	logger.Log().Msg("RefreshTokenSecret: " + cfg.Token.RefreshTokenSecret)
+
 	db, err := sql.Open("postgres", cfg.DataBase.DataBaseURI)
 	if err != nil {
 		logger.Error().Msg(err.Error())
