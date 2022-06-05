@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
 
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 

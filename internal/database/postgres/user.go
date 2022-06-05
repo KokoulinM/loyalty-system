@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
+
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 
 func (db *PostgresDatabase) CreateUser(ctx context.Context, user models.User) (*models.User, error) {

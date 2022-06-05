@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/rs/zerolog"
+
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/database/postgres"
@@ -15,7 +17,6 @@ import (
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/workers"
-	"github.com/rs/zerolog"
 )
 
 func main() {
@@ -61,7 +62,7 @@ func main() {
 
 	logger.Log().Msg("finish setup db")
 
-	handlers := handlers.New(repo, cfg)
+	handlers := handlers.New(repo, jobStore, cfg)
 
 	router := router.New(handlers, cfg)
 

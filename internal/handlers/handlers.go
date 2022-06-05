@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
@@ -27,9 +28,14 @@ type Repository interface {
 	GetWithdrawals(ctx context.Context, userID string) ([]models.WithdrawOrder, error)
 }
 
+type JobStore interface {
+	AddJob(ctx context.Context, job models.JobStoreRow) error
+}
+
 type Handlers struct {
-	repo Repository
-	cfg  *config.Config
+	repo     Repository
+	jobStore JobStore
+	cfg      *config.Config
 }
 
 type ErrorWithDB struct {
@@ -52,10 +58,11 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, cfg *config.Config) *Handlers {
+func New(repo Repository, jobStore JobStore, cfg *config.Config) *Handlers {
 	return &Handlers{
-		repo: repo,
-		cfg:  cfg,
+		repo:     repo,
+		jobStore: jobStore,
+		cfg:      cfg,
 	}
 }
 
@@ -201,6 +208,26 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	parameters, err := json.Marshal(&models.CheckOrderStatusParameters{
+		OrderNumber: strconv.Itoa(number),
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	job := models.JobStoreRow{
+		Type:            "CheckOrderStatus",
+		NextTimeExecute: time.Now(),
+		Count:           0,
+		Parameters:      string(parameters),
+	}
+	err = h.jobStore.AddJob(r.Context(), job)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
