@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/rs/zerolog"
+
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers/middlewares"
@@ -36,6 +38,7 @@ type Handlers struct {
 	repo     Repository
 	jobStore JobStore
 	cfg      *config.Config
+	logger   *zerolog.Logger
 }
 
 type ErrorWithDB struct {
@@ -58,10 +61,11 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, jobStore JobStore, cfg *config.Config) *Handlers {
+func New(repo Repository, jobStore JobStore, logger *zerolog.Logger, cfg *config.Config) *Handlers {
 	return &Handlers{
 		repo:     repo,
 		jobStore: jobStore,
+		logger:   logger,
 		cfg:      cfg,
 	}
 }
