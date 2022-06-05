@@ -40,3 +40,12 @@ CREATE TABLE jobstore (
     count INT,
     executed BOOL DEFAULT FALSE
 );
+
+CREATE TABLE jobstore (
+  id uuid DEFAULT uuid_generate_v4 () PRIMARY KEY,
+  type VARCHAR(50),
+  next_time_execute TIMESTAMP,
+  parameters json,
+  count INT,
+  executed BOOL DEFAULT FALSE
+);
