@@ -17,7 +17,7 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-func CreateToken(userID string, cfg config.ConfigToken) (*TokenDetails, error) {
+func CreateToken(userID string, email string, cfg *config.ConfigToken) (*TokenDetails, error) {
 	td := &TokenDetails{
 		AtExpires: time.Now().Add(time.Second * time.Duration(cfg.AccessTokenLiveTimeMinutes)).Unix(),
 		RtExpires: time.Now().Add(time.Second - time.Duration(cfg.RefreshTokenLiveTimeDays)).Unix(),
@@ -26,11 +26,13 @@ func CreateToken(userID string, cfg config.ConfigToken) (*TokenDetails, error) {
 	atClaims := jwt.MapClaims{
 		"exp":     td.AtExpires,
 		"user_id": userID,
+		"email":   email,
 	}
 
 	rtClaims := jwt.MapClaims{
 		"exp":     td.RtExpires,
 		"user_id": userID,
+		"email":   email,
 	}
 
 	atWithClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
@@ -69,7 +71,7 @@ func ValidateToken(signedToken string, cfg *config.ConfigToken) (*jwt.Token, err
 	return token, nil
 }
 
-func RefreshToken(refreshToken string, cfg config.ConfigToken) (*TokenDetails, error) {
+func RefreshToken(refreshToken string, cfg *config.ConfigToken) (*TokenDetails, error) {
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -88,8 +90,9 @@ func RefreshToken(refreshToken string, cfg config.ConfigToken) (*TokenDetails, e
 
 	if ok && token.Valid {
 		userID := claims["user_id"].(string)
+		email := claims["email"].(string)
 
-		td, err := CreateToken(userID, cfg)
+		td, err := CreateToken(userID, email, cfg)
 		if err != nil {
 			return nil, err
 		}
