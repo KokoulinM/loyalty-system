@@ -44,7 +44,7 @@ func main() {
 	logger.Log("Starting setup db")
 	_, err = database.RunMigration(cfg.DataBaseURI)
 	if err != nil {
-		logger.Fatal(err.Error())
+
 	}
 
 	logger.Log("Finish setup db")
