@@ -24,7 +24,6 @@ func main() {
 	logger := logger.New(zerolog.DebugLevel)
 
 	logger.Log("Starting server")
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	interrupt := make(chan os.Signal, 1)
@@ -35,16 +34,14 @@ func main() {
 	cfg := config.New()
 
 	db, err := sql.Open("postgres", cfg.DataBase.DataBaseURI)
+	logger.Log("Finish db connection")
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	logger.Log("Finish db connection")
-
 	repo := postgres.New(db)
 
 	logger.Log("Starting setup db")
-
 	_, err = database.RunMigration(cfg.DataBase.DataBaseURI)
 	if err != nil {
 		logger.Fatal(err.Error())
