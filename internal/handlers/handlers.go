@@ -67,7 +67,7 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(body) == 0 {
+	if body != nil {
 		http.Error(w, "the body is missing", http.StatusBadRequest)
 		return
 	}
