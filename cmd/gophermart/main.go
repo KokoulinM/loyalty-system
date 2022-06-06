@@ -11,8 +11,6 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/rs/zerolog"
-
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
