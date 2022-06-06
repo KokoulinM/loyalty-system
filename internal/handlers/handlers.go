@@ -21,6 +21,7 @@ type Repository interface {
 	CheckPassword(ctx context.Context, user models.User) (*models.User, error)
 	CreateOrder(ctx context.Context, order models.Order) error
 	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error)
+	GetBalance(ctx context.Context, userID string) (models.UserBalance, error)
 }
 
 type Handlers struct {
@@ -245,7 +246,41 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Add("Content-Type", "application/json")
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	defer r.Body.Close()
+
+	r.Header.Add("Content-Length", "0")
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+
+	userBalance, err := h.repo.GetBalance(r.Context(), userIDCtx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	body, err := json.Marshal(userBalance)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 

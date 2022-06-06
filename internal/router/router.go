@@ -22,6 +22,10 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 			r.Post("/", h.CreateOrder)
 			r.Get("/", h.GetOrders)
 		})
+		router.Route("/api/user/balance", func(r chi.Router) {
+			r.Use(middlewares.JWTMiddleware(&cfg.Token))
+			r.Get("/", h.GetBalance)
+		})
 	})
 
 	return router
