@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -59,6 +58,11 @@ func New(repo Repository, cfg *config.Config) *Handlers {
 }
 
 func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
@@ -107,6 +111,11 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
@@ -148,6 +157,11 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	defer r.Body.Close()
 
 	r.Header.Add("Content-Type", "text/plain")
@@ -205,9 +219,12 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-	log.Println(userIDCtx)
+	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
 	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
 	if err != nil {
@@ -215,14 +232,10 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(orders)
-
 	if len(orders) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-
-	log.Println("3")
 
 	body, err := json.Marshal(orders)
 	if err != nil {
@@ -241,6 +254,11 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
 	userBalance, err := h.repo.GetBalance(r.Context(), userIDCtx)
@@ -267,6 +285,11 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	defer r.Body.Close()
 
 	withdraw := models.Withdraw{}
