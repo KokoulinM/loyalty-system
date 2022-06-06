@@ -14,6 +14,11 @@ func (db *PostgresDatabase) CreateUser(ctx context.Context, user models.User) (*
 	query := `INSERT INTO users (first_name, last_name, login, password) VALUES ($1, $2, $3, $4)`
 
 	_, err := db.conn.ExecContext(ctx, query, user.FirstName, user.LastName, user.Login, user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	resultUser, err := db.getUserByLogin(ctx, user.Login)
 
 	var pgErr *pq.Error
 
@@ -21,11 +26,6 @@ func (db *PostgresDatabase) CreateUser(ctx context.Context, user models.User) (*
 		if pgErr.Code == pgerrcode.UniqueViolation {
 			return nil, handlers.NewErrorWithDB(err, "UniqConstraint")
 		}
-	}
-
-	resultUser, err := db.getUserByLogin(ctx, user.Login)
-	if err != nil {
-		return nil, err
 	}
 
 	return resultUser, err
