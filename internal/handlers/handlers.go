@@ -22,7 +22,6 @@ type Repository interface {
 	CreateOrder(ctx context.Context, order models.Order) error
 	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error)
 	GetBalance(ctx context.Context, userID string) (models.UserBalance, error)
-	CreateWithdraw(ctx context.Context, withdraw models.Withdraw, userID string) error
 }
 
 type Handlers struct {
@@ -224,6 +223,8 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.Header.Add("Content-Length", "0")
+
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
 	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
@@ -259,6 +260,8 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.Header.Add("Content-Length", "0")
+
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
 	userBalance, err := h.repo.GetBalance(r.Context(), userIDCtx)
@@ -282,52 +285,4 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	defer r.Body.Close()
-
-	withdraw := models.Withdraw{}
-
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = json.Unmarshal(body, &withdraw)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	number, err := strconv.Atoi(string(withdraw.Order))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !utils.ValidLuhnNumber(number) {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-
-	err = h.repo.CreateWithdraw(r.Context(), withdraw, userIDCtx)
-	if err != nil {
-		var dbErr *ErrorWithDB
-
-		if errors.As(err, &dbErr) && dbErr.Title == "NotEnoughBalanceForWithdraw" {
-			w.WriteHeader(http.StatusPaymentRequired)
-			return
-		}
-	}
-
-	w.WriteHeader(http.StatusOK)
 }
