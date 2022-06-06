@@ -10,7 +10,7 @@ import (
 const (
 	ServerAddress              = ":8080"
 	DataBaseURI                = "postgres://postgres:postgres@localhost:5432/gophermartdb?sslmode=disable"
-	AccrualSystemAddress       = "http://localhost:8080/"
+	AccrualSystemAddress       = ""
 	AccessTokenSecret          = ""
 	RefreshTokenSecret         = ""
 	AccessTokenLiveTimeMinutes = 60
@@ -19,8 +19,8 @@ const (
 
 type Config struct {
 	ServerAddress        string `env:"RUN_ADDRESS"`
-	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	DataBase             ConfigDatabase
+	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	Token                ConfigToken
 }
 
@@ -73,8 +73,6 @@ func New() *Config {
 	cfg.Token = tokenConfig
 
 	flag.Parse()
-
-	cfg.AccrualSystemAddress += "/api/orders/"
 
 	return &cfg
 }
