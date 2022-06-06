@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,8 +31,6 @@ func main() {
 	logger.Log("Starting parse configuration")
 
 	cfg := config.New()
-
-	log.Println(cfg)
 
 	db, err := sql.Open("postgres", cfg.DataBaseURI)
 	logger.Log("Finish db connection")
