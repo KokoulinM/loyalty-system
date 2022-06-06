@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/rs/zerolog"
 
@@ -25,6 +26,9 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	logger.Log().Msg("starting parse configuration")
 
@@ -83,10 +87,11 @@ func main() {
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
-
 	select {
-	case <-sigint:
+	case <-interrupt:
 		cancel()
+		break
 	case <-ctx.Done():
+		break
 	}
 }
