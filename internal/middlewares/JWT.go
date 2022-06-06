@@ -7,9 +7,9 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 )
 
 func JWTMiddleware(cfg *config.ConfigToken) func(next http.Handler) http.Handler {

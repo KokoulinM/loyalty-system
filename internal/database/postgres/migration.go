@@ -1,4 +1,4 @@
-package database
+package postgres
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 )
 
 func RunMigration(databaseDSN string) (bool, error) {
-	m, err := migrate.New("file://cmd/gophermart/database/migration", databaseDSN)
+	m, err := migrate.New("file://migration", databaseDSN)
 	if err != nil {
 		if !errors.Is(err, migrate.ErrNoChange) {
 			return false, err

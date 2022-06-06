@@ -4,9 +4,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/handlers"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/middlewares"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/middlewares"
 )
 
 func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
@@ -15,7 +15,7 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 	router.Use(middleware.Logger)
 
 	router.Route("/", func(r chi.Router) {
-		r.Use(middlewares.JWTMiddleware(&cfg.Token))
+		r.Use(middlewares.JWTMiddleware(&cfg.Token), middlewares.GzipMiddleware)
 		r.Post("/api/user/register", h.Register)
 		r.Post("/api/user/login", h.Login)
 		r.Post("/api/user/orders", h.CreateOrder)

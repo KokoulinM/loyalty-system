@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
 	"github.com/rs/zerolog"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/utils"
