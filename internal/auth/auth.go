@@ -3,11 +3,11 @@ package auth
 import (
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 )
 
-var accessTokenSecret = []byte("accessTokenSecret")
-var refreshTokenSecret = []byte("refreshTokenSecret")
+var accessSecret = []byte("accessSecret")
+var refreshSecret = []byte("refreshSecret")
 
 type TokenDetails struct {
 	AccessToken  string
@@ -16,33 +16,43 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
+type JWTClaims struct {
+	userID string
+	email  string
+	jwt.StandardClaims
+}
+
 func CreateToken(userID string, email string) (*TokenDetails, error) {
 	td := &TokenDetails{
-		AtExpires: time.Now().Add(time.Minute * time.Duration(1)).Unix(),
+		AtExpires: time.Now().Add(time.Minute * time.Duration(60)).Unix(),
 		RtExpires: time.Now().Add(time.Hour * time.Duration(24)).Unix(),
 	}
 
-	atClaims := jwt.MapClaims{
-		"exp":     td.AtExpires,
-		"user_id": userID,
-		"email":   email,
+	atClaims := &JWTClaims{
+		userID: userID,
+		email:  email,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: td.AtExpires,
+		},
 	}
 
-	rtClaims := jwt.MapClaims{
-		"exp":     td.RtExpires,
-		"user_id": userID,
-		"email":   email,
+	rtClaims := &JWTClaims{
+		userID: userID,
+		email:  email,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: td.RtExpires,
+		},
 	}
 
 	atWithClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	rtWithClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
-	at, err := atWithClaims.SignedString([]byte(accessTokenSecret))
+	at, err := atWithClaims.SignedString(accessSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	rt, err := rtWithClaims.SignedString([]byte(refreshTokenSecret))
+	rt, err := rtWithClaims.SignedString(refreshSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -55,13 +65,8 @@ func CreateToken(userID string, email string) (*TokenDetails, error) {
 
 func ValidateToken(signedToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte(accessTokenSecret), nil
+		return []byte(accessSecret), nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = token.Claims.Valid()
 	if err != nil {
 		return nil, err
 	}
