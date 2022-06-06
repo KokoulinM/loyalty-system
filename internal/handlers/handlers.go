@@ -7,18 +7,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/utils"
 )
 
 type Repository interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
 	CheckPassword(ctx context.Context, user models.User) (*models.User, error)
-	CreateOrder(ctx context.Context, order models.Order) error
 }
 
 type Handlers struct {
@@ -46,10 +43,10 @@ func NewErrorWithDB(err error, title string) error {
 	}
 }
 
-func New(repo Repository, cfg *config.Config) *Handlers {
+func New(repo Repository, cfg config.Config) *Handlers {
 	return &Handlers{
 		repo: repo,
-		cfg:  *cfg,
+		cfg:  cfg,
 	}
 }
 
@@ -145,64 +142,4 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Authorization", "Bearer "+token.AccessToken)
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	defer r.Body.Close()
-
-	r.Header.Add("Content-Type", "text/plain")
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(body) == 0 {
-		http.Error(w, "the body is missing", http.StatusBadRequest)
-		return
-	}
-
-	number, err := strconv.Atoi(string(body))
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !utils.ValidLuhnNumber(number) {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-
-	order := models.Order{
-		UserID: "",
-		Number: strconv.Itoa(number),
-		Status: "New",
-	}
-
-	err = h.repo.CreateOrder(r.Context(), order)
-	if err != nil {
-		var dbErr *ErrorWithDB
-
-		if errors.As(err, &dbErr) && dbErr.Title == "OrderAlreadyRegisterByYou" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		if errors.As(err, &dbErr) && dbErr.Title == "OrderAlreadyRegister" {
-			w.WriteHeader(http.StatusConflict)
-			return
-		}
-
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusAccepted)
 }
