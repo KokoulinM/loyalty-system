@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 

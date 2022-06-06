@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/golang-jwt/jwt"
+
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 )
 
 type TokenDetails struct {

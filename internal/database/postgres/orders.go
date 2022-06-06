@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/lib/pq"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 
@@ -80,12 +80,7 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 }
 
 func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string, status string, accrual float64) error {
-	sqlChangeOrderStatus := `UPDATE orders SET accrual = $1, status = $2 WHERE number = $3`
-	db.logger.Log().Msg("finish sqlChangeOrderStatus")
-	sqlAddUserBalance := `UPDATE users SET balance = balance + $1 WHERE id = $2`
-	db.logger.Log().Msg("finish sqlAddUserBalance")
 	userID, err := db.getUserIDByOrder(ctx, order)
-	db.logger.Log().Msgf("ChangeOrderStatus: %s", userID)
 	if err != nil {
 		return err
 	}
@@ -97,12 +92,12 @@ func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string,
 
 	defer tx.Rollback()
 
-	_, err = tx.ExecContext(ctx, sqlChangeOrderStatus, accrual, status, order)
+	_, err = tx.ExecContext(ctx, `UPDATE orders SET accrual = $1, status = $2 WHERE number = $3`, accrual, status, order)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, sqlAddUserBalance, accrual, userID)
+	_, err = tx.ExecContext(ctx, `UPDATE users SET balance = balance + $1 WHERE id = $2`, accrual, userID)
 	if err != nil {
 		return err
 	}
@@ -111,12 +106,14 @@ func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string,
 }
 
 func (db *PostgresDatabase) getUserIDByOrder(ctx context.Context, order string) (string, error) {
-	userID := ""
-	sqlGetUserIDByOrder := `SELECT user_id FROM orders WHERE number = $1`
-	query := db.conn.QueryRowContext(ctx, sqlGetUserIDByOrder, order)
+	var userID string
+
+	query := db.conn.QueryRowContext(ctx, `SELECT user_id FROM orders WHERE number = $1`, order)
+
 	err := query.Scan(&userID)
 	if err != nil {
 		return userID, err
 	}
+
 	return userID, nil
 }

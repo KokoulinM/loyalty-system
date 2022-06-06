@@ -14,7 +14,6 @@ import (
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers/middlewares"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/utils"
 )
@@ -28,6 +27,10 @@ type Repository interface {
 	CreateWithdraw(ctx context.Context, withdraw models.Withdraw, userID string) error
 	GetWithdrawals(ctx context.Context, userID string) ([]models.WithdrawOrder, error)
 }
+
+type ContextType string
+
+const UserIDCtx ContextType = "ctxUserId"
 
 type JobStore interface {
 	AddJob(ctx context.Context, job models.JobStoreRow) error
@@ -190,7 +193,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	userIDCtx := r.Context().Value(UserIDCtx).(string)
 
 	order := models.Order{
 		UserID: userIDCtx,
@@ -240,7 +243,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	userIDCtx := r.Context().Value(UserIDCtx).(string)
 
 	r.Header.Add("Content-Length", "0")
 
@@ -273,7 +276,7 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	userIDCtx := r.Context().Value(UserIDCtx).(string)
 
 	userBalance, err := h.repo.GetBalance(r.Context(), userIDCtx)
 	if err != nil {
@@ -305,7 +308,7 @@ func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
 
 	withdraw := models.Withdraw{}
 
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	userIDCtx := r.Context().Value(UserIDCtx).(string)
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -344,7 +347,7 @@ func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+	userIDCtx := r.Context().Value(UserIDCtx).(string)
 
 	withdrawals, err := h.repo.GetWithdrawals(r.Context(), userIDCtx)
 	if err != nil {

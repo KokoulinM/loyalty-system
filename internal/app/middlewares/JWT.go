@@ -5,14 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
 	"github.com/golang-jwt/jwt"
+
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/handlers"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/auth"
 )
-
-type ContextType string
-
-const UserIDCtx ContextType = "ctxUserId"
 
 func JWTMiddleware(cfg *config.ConfigToken) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -26,7 +24,7 @@ func JWTMiddleware(cfg *config.ConfigToken) func(next http.Handler) http.Handler
 
 				userID := token.Claims.(jwt.MapClaims)["user_id"]
 
-				next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, userID)))
+				next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), handlers.UserIDCtx, userID)))
 				return
 			}
 			next.ServeHTTP(w, r)
