@@ -68,7 +68,7 @@ func main() {
 
 	logger.Log().Msg("finish setup db")
 
-	handlers := handlers.New(repo, jobStore, &logger, cfg)
+	handlers := handlers.New(repo, jobStore, cfg)
 
 	router := router.New(handlers, cfg)
 
