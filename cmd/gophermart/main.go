@@ -49,13 +49,11 @@ func main() {
 
 	logger.Log("Finish setup db")
 
-	handlers := handlers.New(repo, &cfg)
+	handlers := handlers.New(repo, cfg)
 
-	router := router.New(handlers, &cfg)
+	router := router.New(handlers, cfg)
 
-	log.Println(cfg)
-
-	s := server.New(ctx, router, &cfg.ServerAddress)
+	s := server.New(ctx, router, cfg.ServerAddress)
 
 	g, ctx := errgroup.WithContext(ctx)
 
