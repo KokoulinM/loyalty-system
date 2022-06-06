@@ -207,7 +207,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
-	log.Println("log.Println", userIDCtx)
+	log.Println(userIDCtx)
 
 	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
 	if err != nil {
@@ -215,20 +215,20 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("log.Println", orders)
+	log.Println(orders)
 
 	if len(orders) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
+	log.Println("3")
+
 	body, err := json.Marshal(orders)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	log.Println("log.Println", body)
 
 	w.Header().Set("Content-Type", "application/json")
 
