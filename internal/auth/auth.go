@@ -6,9 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/golang-jwt/jwt"
 )
+
+var accessTokenSecret = "accessTokenSecret"
+var refreshTokenSecret = "refreshTokenSecret"
 
 type TokenDetails struct {
 	AccessToken  string
@@ -17,10 +19,10 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-func CreateToken(userID string, email string, cfg *config.ConfigToken) (*TokenDetails, error) {
+func CreateToken(userID string, email string) (*TokenDetails, error) {
 	td := &TokenDetails{
-		AtExpires: time.Now().Add(time.Second * time.Duration(cfg.AccessTokenLiveTimeMinutes)).Unix(),
-		RtExpires: time.Now().Add(time.Second - time.Duration(cfg.RefreshTokenLiveTimeDays)).Unix(),
+		AtExpires: time.Now().Add(time.Second * time.Duration(10)).Unix(),
+		RtExpires: time.Now().Add(time.Second - time.Duration(20)).Unix(),
 	}
 
 	atClaims := jwt.MapClaims{
@@ -38,12 +40,12 @@ func CreateToken(userID string, email string, cfg *config.ConfigToken) (*TokenDe
 	atWithClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	rtWithClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 
-	at, err := atWithClaims.SignedString([]byte(cfg.AccessTokenSecret))
+	at, err := atWithClaims.SignedString([]byte(accessTokenSecret))
 	if err != nil {
 		return nil, err
 	}
 
-	rt, err := rtWithClaims.SignedString([]byte(cfg.RefreshTokenSecret))
+	rt, err := rtWithClaims.SignedString([]byte(refreshTokenSecret))
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +58,9 @@ func CreateToken(userID string, email string, cfg *config.ConfigToken) (*TokenDe
 	return td, nil
 }
 
-func ValidateToken(signedToken string, cfg *config.ConfigToken) (*jwt.Token, error) {
+func ValidateToken(signedToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
-		return []byte(cfg.AccessTokenSecret), nil
+		return []byte(accessTokenSecret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -71,12 +73,12 @@ func ValidateToken(signedToken string, cfg *config.ConfigToken) (*jwt.Token, err
 	return token, nil
 }
 
-func RefreshToken(refreshToken string, cfg *config.ConfigToken) (*TokenDetails, error) {
+func RefreshToken(refreshToken string) (*TokenDetails, error) {
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(cfg.RefreshTokenSecret), nil
+		return []byte(refreshTokenSecret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -92,7 +94,7 @@ func RefreshToken(refreshToken string, cfg *config.ConfigToken) (*TokenDetails, 
 		userID := claims["user_id"].(string)
 		email := claims["email"].(string)
 
-		td, err := CreateToken(userID, email, cfg)
+		td, err := CreateToken(userID, email)
 		if err != nil {
 			return nil, err
 		}
