@@ -14,7 +14,7 @@ type server struct {
 	ctx context.Context
 }
 
-func New(ctx context.Context, handler *chi.Mux, cfg config.Config) *server {
+func New(ctx context.Context, handler *chi.Mux, cfg *config.Config) *server {
 	s := &http.Server{
 		Addr:    cfg.ServerAddress,
 		Handler: handler,
