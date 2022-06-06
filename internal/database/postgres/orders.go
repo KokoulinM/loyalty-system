@@ -52,3 +52,27 @@ func (db *PostgresDatabase) getOrder(ctx context.Context, number string) (*model
 
 	return order, nil
 }
+
+func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]models.ResponseOrder, error) {
+	var result []models.ResponseOrder
+
+	query := `SELECT number, status, accrual, uploaded_at FROM orders WHERE user_id=$1 ORDER BY uploaded_at`
+
+	rows, err := db.conn.QueryContext(ctx, query, userID)
+	if err != nil {
+		return result, err
+	}
+
+	for rows.Next() {
+		var order models.ResponseOrder
+
+		err := rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.UploadedAt)
+		if err != nil {
+			return result, err
+		}
+
+		result = append(result, order)
+	}
+
+	return result, nil
+}

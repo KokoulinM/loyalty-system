@@ -8,3 +8,10 @@ type Order struct {
 	UploadedAt string  `json:"uploaded_at"`
 	Accrual    float64 `json:"accrual"`
 }
+
+type ResponseOrder struct {
+	Number     string  `json:"number"`
+	Status     string  `json:"status"`
+	Accrual    float64 `json:"accrual"`
+	UploadedAt string  `json:"uploaded_at"`
+}

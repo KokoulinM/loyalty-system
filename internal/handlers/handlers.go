@@ -20,6 +20,7 @@ type Repository interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
 	CheckPassword(ctx context.Context, user models.User) (*models.User, error)
 	CreateOrder(ctx context.Context, order models.Order) error
+	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrder, error)
 }
 
 type Handlers struct {
@@ -213,4 +214,40 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET requests are allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	defer r.Body.Close()
+
+	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
+
+	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(orders) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	body, err := json.Marshal(orders)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
