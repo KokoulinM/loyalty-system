@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/rs/zerolog"
+
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/app/logger"
@@ -11,7 +13,6 @@ import (
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/router"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
-	"github.com/rs/zerolog"
 )
 
 func main() {
