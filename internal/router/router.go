@@ -7,7 +7,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func New(h *handlers.Handlers, cfg config.Config) *chi.Mux {
+func New(repo handlers.Repository, cfg config.Config) *chi.Mux {
+	h := handlers.New(repo, cfg)
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
