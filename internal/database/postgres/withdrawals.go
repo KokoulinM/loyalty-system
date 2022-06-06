@@ -42,10 +42,10 @@ func (db *PostgresDatabase) CreateWithdraw(ctx context.Context, withdraw models.
 	return tx.Commit()
 }
 
-func (db *PostgresDatabase) GetWithdrawals(ctx context.Context, userID string) ([]models.WithdrawOrder, error) {
-	var withdrawals []models.WithdrawOrder
+func (db *PostgresDatabase) GetWithdrawals(ctx context.Context, userID string) ([]models.Withdraw, error) {
+	var withdrawals []models.Withdraw
 
-	query := `SELECT order_number, sum, processed_at FROM withdrawals
+	query := `SELECT order_number, sum, status, processed_at FROM withdrawals
 					 WHERE user_id = $1 ORDER BY processed_at ASC`
 
 	rows, err := db.conn.QueryContext(ctx, query, userID)
@@ -54,9 +54,9 @@ func (db *PostgresDatabase) GetWithdrawals(ctx context.Context, userID string) (
 	}
 
 	for rows.Next() {
-		var withdraw models.WithdrawOrder
+		var withdraw models.Withdraw
 
-		err := rows.Scan(&withdraw.Order, &withdraw.Sum, &withdraw.ProcessedAt)
+		err := rows.Scan(&withdraw.Order, &withdraw.Sum, &withdraw.Status, &withdraw.ProcessedAt)
 		if err != nil {
 			return withdrawals, err
 		}

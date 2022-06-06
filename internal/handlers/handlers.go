@@ -24,7 +24,7 @@ type Repository interface {
 	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error)
 	GetBalance(ctx context.Context, userID string) (models.UserBalance, error)
 	CreateWithdraw(ctx context.Context, withdraw models.Withdraw, userID string) error
-	GetWithdrawals(ctx context.Context, userID string) ([]models.WithdrawOrder, error)
+	GetWithdrawals(ctx context.Context, userID string) ([]models.Withdraw, error)
 }
 
 type Handlers struct {
@@ -322,7 +322,7 @@ func (h *Handlers) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(withdrawals) == 0 {
-		w.WriteHeader(http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
