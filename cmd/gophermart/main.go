@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
@@ -44,10 +45,10 @@ func main() {
 
 	logger.Log("Starting setup db")
 
-	//_, err = database.RunMigration(cfg.DataBase.DataBaseURI)
-	//if err != nil {
-	//	logger.Fatal(err.Error())
-	//}
+	_, err = database.RunMigration(cfg.DataBase.DataBaseURI)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 
 	logger.Log("Finish setup db")
 
