@@ -75,9 +75,10 @@ func main() {
 	case <-ctx.Done():
 		break
 	}
-
-	if err != nil {
-		logger.Log("server returning an error: " + err.Error())
-		os.Exit(2)
-	}
+	//
+	//err = g.Wait()
+	//if err != nil {
+	//	logger.Log("server returning an error: " + err.Error())
+	//	os.Exit(2)
+	//}
 }
