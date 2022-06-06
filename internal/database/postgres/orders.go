@@ -12,9 +12,9 @@ import (
 )
 
 func (db *PostgresDatabase) CreateOrder(ctx context.Context, order models.Order) error {
-	query := `INSERT INTO orders (user_id, number, status, accrual) VALUES($1, $2, $3, $4)`
+	query := `INSERT INTO orders (user_id, number, status, uploaded_at, accrual) VALUES($1, $2, $3, $4, $5)`
 
-	_, err := db.conn.ExecContext(ctx, query, order.UserID, order.Number, order.Status, order.Accrual)
+	_, err := db.conn.ExecContext(ctx, query, order.UserID, order.Number, order.Status, order.UploadedAt, order.Accrual)
 	if err != nil {
 		return err
 	}
@@ -31,10 +31,6 @@ func (db *PostgresDatabase) CreateOrder(ctx context.Context, order models.Order)
 				return handlers.NewErrorWithDB(err, "OrderAlreadyRegisterByYou")
 			}
 			return handlers.NewErrorWithDB(err, "OrderAlreadyRegister")
-		}
-
-		if pgErr.Code == pgerrcode.UndefinedTable {
-			return handlers.NewErrorWithDB(err, "UndefinedTable")
 		}
 	}
 
