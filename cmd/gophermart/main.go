@@ -41,7 +41,7 @@ func main() {
 
 	logger.Log().Msg("finish db connection")
 
-	repo := postgres.New(db, &logger)
+	repo := postgres.New(db)
 
 	jobStore := postgres.NewJobStore(db)
 

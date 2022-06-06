@@ -81,9 +81,7 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 
 func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string, status string, accrual float64) error {
 	sqlChangeOrderStatus := `UPDATE orders SET accrual = $1, status = $2 WHERE number = $3`
-	db.logger.Log().Msg("finish sqlChangeOrderStatus")
 	sqlAddUserBalance := `UPDATE users SET balance = balance + $1 WHERE id = $2`
-	db.logger.Log().Msg("finish sqlAddUserBalance")
 	userID, err := db.getUserByLogin(ctx, order)
 	if err != nil {
 		return err

@@ -1,19 +1,13 @@
 package postgres
 
-import (
-	"database/sql"
-
-	"github.com/rs/zerolog"
-)
+import "database/sql"
 
 type PostgresDatabase struct {
-	conn   *sql.DB
-	logger *zerolog.Logger
+	conn *sql.DB
 }
 
-func New(db *sql.DB, logger *zerolog.Logger) *PostgresDatabase {
+func New(db *sql.DB) *PostgresDatabase {
 	return &PostgresDatabase{
-		conn:   db,
-		logger: logger,
+		conn: db,
 	}
 }
