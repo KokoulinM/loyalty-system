@@ -6,11 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog"
-
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
+	"github.com/rs/zerolog"
 )
 
 type WorkerPoolJobStore interface {
