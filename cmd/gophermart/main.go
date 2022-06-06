@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/rs/zerolog"
 
@@ -43,6 +44,8 @@ func main() {
 	handlers := handlers.New(repo, &cfg)
 
 	router := router.New(handlers, &cfg)
+
+	log.Println(cfg)
 
 	s := server.New(ctx, router, &cfg)
 
