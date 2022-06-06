@@ -14,8 +14,6 @@ func (db *PostgresDatabase) CreateWithdraw(ctx context.Context, withdraw models.
 		return err
 	}
 
-	defer tx.Rollback()
-
 	var enough bool
 
 	row := tx.QueryRowContext(ctx, "SELECT balance >= $1 FROM users WHERE id = $2", withdraw.Sum, userID)
@@ -54,8 +52,6 @@ func (db *PostgresDatabase) GetWithdrawals(ctx context.Context, userID string) (
 	if err != nil {
 		return withdrawals, err
 	}
-
-	defer rows.Close()
 
 	for rows.Next() {
 		var withdraw models.WithdrawOrder

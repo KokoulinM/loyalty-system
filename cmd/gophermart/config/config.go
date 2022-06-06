@@ -10,7 +10,7 @@ import (
 const (
 	ServerAddress              = ":8080"
 	DataBaseURI                = "postgres://postgres:postgres@localhost:5432/gophermartdb?sslmode=disable"
-	AccrualSystemAddress       = ""
+	AccrualSystemAddress       = "http://localhost:8080"
 	AccessTokenSecret          = ""
 	RefreshTokenSecret         = ""
 	AccessTokenLiveTimeMinutes = 60
