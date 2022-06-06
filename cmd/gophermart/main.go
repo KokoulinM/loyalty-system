@@ -25,6 +25,7 @@ func main() {
 	logger.Log().Msg("starting server")
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -36,8 +37,6 @@ func main() {
 	logger.Log().Msg("ServerAddress: " + cfg.ServerAddress)
 	logger.Log().Msg("AccrualSystemAddress: " + cfg.AccrualSystemAddress)
 	logger.Log().Msg("DataBase: " + cfg.DataBase.DataBaseURI)
-	logger.Log().Msg("AccessTokenSecret: " + cfg.Token.AccessTokenSecret)
-	logger.Log().Msg("RefreshTokenSecret: " + cfg.Token.RefreshTokenSecret)
 
 	db, err := sql.Open("postgres", cfg.DataBase.DataBaseURI)
 	if err != nil {
@@ -49,6 +48,7 @@ func main() {
 	repo := postgres.New(db)
 
 	jobStore := postgres.NewJobStore(db)
+
 	var listTask []tasks.TaskInterface
 	listTask = append(listTask, tasks.NewCheckOrderStatusTask(cfg.AccrualSystemAddress, &logger, repo.ChangeOrderStatus))
 	taskStore := tasks.NewTaskStore(listTask)

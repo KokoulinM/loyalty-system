@@ -86,18 +86,23 @@ func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string,
 	if err != nil {
 		return err
 	}
+
 	tx, err := db.conn.Begin()
 	if err != nil {
 		return err
 	}
+
 	defer tx.Rollback()
+
 	_, err = tx.ExecContext(ctx, sqlChangeOrderStatus, accrual, status, order)
 	if err != nil {
 		return err
 	}
+
 	_, err = tx.ExecContext(ctx, sqlAddUserBalance, accrual, userID)
 	if err != nil {
 		return err
 	}
+
 	return tx.Commit()
 }
