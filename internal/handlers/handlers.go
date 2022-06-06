@@ -176,7 +176,7 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !utils.ValidLuhnNumber(number) {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
