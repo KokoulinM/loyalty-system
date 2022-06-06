@@ -15,7 +15,6 @@ import (
 
 type Repository interface {
 	CreateUser(ctx context.Context, user models.User) (*models.User, error)
-	CheckPassword(ctx context.Context, user models.User) (*models.User, error)
 }
 
 type Handlers struct {
@@ -83,52 +82,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 	var dbErr *ErrorWithDB
 
 	if errors.As(err, &dbErr) && dbErr.Title == "UniqConstraint" {
-		http.Error(w, err.Error(), http.StatusConflict)
-		return
-	}
-
-	token, err := auth.CreateToken(newUser.ID, h.cfg.Token)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Add("Authorization", "Bearer "+token.AccessToken)
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "only POST requests are allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	r.Header.Add("Content-Type", "application/json; charset=utf-8")
-
-	user := models.User{}
-
-	defer r.Body.Close()
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(body) == 0 {
-		http.Error(w, "the body is missing", http.StatusBadRequest)
-		return
-	}
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	newUser, err := h.repo.CheckPassword(r.Context(), user)
-	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}

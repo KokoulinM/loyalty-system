@@ -45,22 +45,3 @@ func (db *PostgresDatabase) getUserByLogin(ctx context.Context, login string) (*
 
 	return user, nil
 }
-
-func (db *PostgresDatabase) CheckPassword(ctx context.Context, user models.User) (*models.User, error) {
-	u := &models.User{}
-
-	query := `SELECT id, login, first_name, last_name FROM users WHERE login=$1 AND password=$2`
-
-	row := db.conn.QueryRowContext(ctx, query, user.Login, user.Password)
-
-	err := row.Scan(&u.ID, &u.Login, &u.FirstName, &u.LastName)
-	if err != nil {
-		return nil, errors.New("wrong login or password")
-	}
-
-	if u.ID == "" {
-		return nil, errors.New("wrong login or password")
-	}
-
-	return u, nil
-}
