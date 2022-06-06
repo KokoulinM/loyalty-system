@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/config"
@@ -56,10 +54,8 @@ func CreateToken(userID string, cfg config.ConfigToken) (*TokenDetails, error) {
 	return td, nil
 }
 
-func ValidateToken(r *http.Request, cfg *config.ConfigToken) (*jwt.Token, error) {
-	tokenString := ExtractToken(r)
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func ValidateToken(signedToken string, cfg *config.ConfigToken) (*jwt.Token, error) {
+	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
 		return []byte(cfg.AccessTokenSecret), nil
 	})
 	if err != nil {
@@ -71,15 +67,6 @@ func ValidateToken(r *http.Request, cfg *config.ConfigToken) (*jwt.Token, error)
 	}
 
 	return token, nil
-}
-
-func ExtractToken(r *http.Request) string {
-	bearerToken := r.Header.Get("Authorization")
-	strArr := strings.Split(bearerToken, " ")
-	if len(strArr) == 2 {
-		return strArr[1]
-	}
-	return ""
 }
 
 func RefreshToken(refreshToken string, cfg config.ConfigToken) (*TokenDetails, error) {
