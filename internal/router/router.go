@@ -20,7 +20,6 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 		router.Route("/api/user/orders", func(r chi.Router) {
 			r.Use(middlewares.JWTMiddleware(&cfg.Token))
 			r.Post("/", h.CreateOrder)
-			r.Get("/", h.GetOrders)
 		})
 	})
 
