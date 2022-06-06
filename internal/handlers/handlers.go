@@ -24,7 +24,6 @@ type Repository interface {
 	GetOrders(ctx context.Context, userID string) ([]models.ResponseOrderWithAccrual, error)
 	GetBalance(ctx context.Context, userID string) (models.UserBalance, error)
 	CreateWithdraw(ctx context.Context, withdraw models.Withdraw, userID string) error
-	GetWithdrawals(ctx context.Context, userID string) ([]models.Withdraw, error)
 }
 
 type Handlers struct {
@@ -310,35 +309,4 @@ func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func (h *Handlers) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
-	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
-
-	withdrawals, err := h.repo.GetWithdrawals(r.Context(), userIDCtx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(withdrawals) == 0 {
-		http.Error(w, err.Error(), http.StatusNoContent)
-		return
-	}
-
-	body, err := json.Marshal(withdrawals)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	w.WriteHeader(http.StatusOK)
-
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
