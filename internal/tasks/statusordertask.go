@@ -74,7 +74,7 @@ func (os *CheckOrderStatusTask) CreateFunction(parameters map[string]string) (fu
 		}
 
 		if err := os.changeStatus(ctx, result.Order, result.Status, result.Accrual); err != nil {
-			os.logger.Error().Msgf("error on db side with update status to order: %v", err.Error())
+			os.logger.Error().Msg("error on db side with update status to order: " + err.Error())
 			return err
 		}
 		return nil
