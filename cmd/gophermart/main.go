@@ -16,14 +16,11 @@ func main() {
 	for {
 		jwt, err := auth.ValidateToken(token.AccessToken)
 		if err != nil {
-			token, err = auth.RefreshToken(token.RefreshToken)
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			fmt.Println(jwt.Raw)
+			panic(err)
 		}
 
-		time.Sleep(1 * time.Second)
+		fmt.Println(jwt.Raw)
+
+		time.Sleep(30 * time.Second)
 	}
 }
