@@ -85,13 +85,16 @@ func main() {
 		return nil
 	}()
 
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, os.Interrupt)
 	select {
 	case <-interrupt:
 		cancel()
 		break
 	case <-ctx.Done():
 		break
+	}
+
+	if err != nil {
+		logger.Error().Msgf("server returning an error: %s", err.Error())
+		os.Exit(2)
 	}
 }
