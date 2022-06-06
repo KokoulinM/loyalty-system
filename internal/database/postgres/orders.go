@@ -84,7 +84,7 @@ func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string,
 	db.logger.Log().Msg("finish sqlChangeOrderStatus")
 	sqlAddUserBalance := `UPDATE users SET balance = balance + $1 WHERE id = $2`
 	db.logger.Log().Msg("finish sqlAddUserBalance")
-	userID, err := db.getUserIDByOrder(ctx, order)
+	userID, err := db.getUserByLogin(ctx, order)
 	db.logger.Log().Msgf("ChangeOrderStatus: %s", userID)
 	if err != nil {
 		return err
@@ -108,15 +108,4 @@ func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string,
 	}
 
 	return tx.Commit()
-}
-
-func (db *PostgresDatabase) getUserIDByOrder(ctx context.Context, order string) (string, error) {
-	userID := ""
-	sqlGetUserIDByOrder := `SELECT user_id FROM orders WHERE number = $1`
-	query := db.conn.QueryRowContext(ctx, sqlGetUserIDByOrder, order)
-	err := query.Scan(&userID)
-	if err != nil {
-		return userID, err
-	}
-	return userID, nil
 }
