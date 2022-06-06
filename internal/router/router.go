@@ -22,7 +22,6 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 		r.Get("/api/user/orders", h.GetOrders)
 		r.Get("/api/user/balance", h.GetBalance)
 		r.Post("/api/user/balance/withdraw", h.CreateWithdraw)
-		r.Get("/api/user/balance/withdrawals", h.CreateWithdraw)
 	})
 
 	return router
