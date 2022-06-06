@@ -21,6 +21,10 @@ func (db *PostgresDatabase) CreateUser(ctx context.Context, user models.User) (*
 		if pgErr.Code == pgerrcode.UniqueViolation {
 			return nil, handlers.NewErrorWithDB(err, "UniqConstraint")
 		}
+
+		if pgErr.Code == pgerrcode.UndefinedTable {
+			return nil, handlers.NewErrorWithDB(err, "UndefinedTable")
+		}
 	}
 
 	resultUser, err := db.getUserByLogin(ctx, user.Login)
