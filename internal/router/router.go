@@ -26,10 +26,6 @@ func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {
 			r.Use(middlewares.JWTMiddleware(&cfg.Token))
 			r.Get("/", h.GetBalance)
 		})
-		router.Route("/api/user/balance/withdraw", func(r chi.Router) {
-			r.Use(middlewares.JWTMiddleware(&cfg.Token))
-			r.Post("/", h.CreateWithdraw)
-		})
 	})
 
 	return router

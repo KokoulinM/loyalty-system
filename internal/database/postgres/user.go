@@ -11,9 +11,9 @@ import (
 )
 
 func (db *PostgresDatabase) CreateUser(ctx context.Context, user models.User) (*models.User, error) {
-	query := `INSERT INTO users (first_name, last_name, login, password, balance, spend) VALUES ($1, $2, $3, $4, $5, $6)`
+	query := `INSERT INTO users (first_name, last_name, login, password) VALUES ($1, $2, $3, $4)`
 
-	_, err := db.conn.ExecContext(ctx, query, user.FirstName, user.LastName, user.Login, user.Password, user.UserBalance.Balance, user.UserBalance.Spent)
+	_, err := db.conn.ExecContext(ctx, query, user.FirstName, user.LastName, user.Login, user.Password)
 
 	var pgErr *pq.Error
 
