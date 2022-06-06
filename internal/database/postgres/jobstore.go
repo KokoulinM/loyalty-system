@@ -35,6 +35,9 @@ func (js *JobStore) GetJobToExecute(ctx context.Context, maxCount int) ([]models
 	if err != nil {
 		return result, err
 	}
+
+	defer rows.Close()
+
 	if rows.Err() != nil {
 		return result, rows.Err()
 	}
