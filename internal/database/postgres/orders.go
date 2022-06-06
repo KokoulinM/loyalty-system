@@ -63,8 +63,6 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 		return result, err
 	}
 
-	defer rows.Close()
-
 	for rows.Next() {
 		var order models.ResponseOrderWithAccrual
 
