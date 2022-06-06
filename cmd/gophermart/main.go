@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/KokoulinM/go-musthave-diploma-tpl/cmd/gophermart/database"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
@@ -40,13 +41,13 @@ func main() {
 
 	repo := postgres.New(db)
 
-	//logger.Log("Starting setup db")
-	//_, err = database.RunMigration(cfg.DataBaseURI)
-	//if err != nil {
-	//	logger.Fatal(err.Error())
-	//}
+	logger.Log("Starting setup db")
+	_, err = database.RunMigration(cfg.DataBaseURI)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
 
-	//logger.Log("Finish setup db")
+	logger.Log("Finish setup db")
 
 	handlers := handlers.New(repo, &cfg)
 
