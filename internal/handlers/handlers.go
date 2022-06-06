@@ -176,8 +176,6 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Log().Msgf("Handler CreateOrder: %s", string(body))
-
 	number, err := strconv.Atoi(string(body))
 
 	if err != nil {
