@@ -41,7 +41,7 @@ func (os *CheckOrderStatusTask) CreateFunction(parameters map[string]string) (fu
 		return nil, errors.New("wrong parameters")
 	}
 	return func(ctx context.Context) error {
-		response, err := http.Get(os.accrualURL + orderNumber)
+		response, err := http.Get(os.accrualURL + "/api/orders/" + orderNumber)
 
 		if err != nil {
 			os.logger.Warn().Msg("Problem with access accrual service")

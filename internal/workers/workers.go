@@ -58,7 +58,7 @@ func (wp *WorkerPool) Run(ctx context.Context) {
 				case job := <-wp.inputCh:
 					err := job.Func(ctx)
 					if err != nil {
-						wp.logger.Fatal().Msgf("Error on worker #%v: %v\n", i, err.Error())
+						wp.logger.Error().Msgf("Error on worker #%v: %v\n", i, err.Error())
 						err = wp.jobStore.IncreaseCounter(ctx, job.ID, job.Count)
 						if err != nil {
 							wp.logger.Error().Msgf("Error with increase job counter with job:%v error:%v", job.ID, err.Error())

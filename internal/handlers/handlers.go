@@ -268,6 +268,9 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
+	h.logger.Log().Msg(w.Header().Get("Code"))
+	h.logger.Log().Msg(w.Header().Get("Content-Type"))
+
 	_, err = w.Write(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
