@@ -37,6 +37,9 @@ func (os *CheckOrderStatusTask) GetTitle() string {
 
 func (os *CheckOrderStatusTask) CreateFunction(parameters map[string]string) (func(ctx context.Context) error, error) {
 	orderNumber, ok := parameters["order_number"]
+
+	os.logger.Log().Msgf("Handler CreateFunction: %s", orderNumber)
+
 	if !ok {
 		return nil, errors.New("wrong parameters")
 	}
@@ -61,6 +64,9 @@ func (os *CheckOrderStatusTask) CreateFunction(parameters map[string]string) (fu
 		}
 		defer response.Body.Close()
 		body, err := io.ReadAll(response.Body)
+
+		os.logger.Log().Msgf("Handler CreateFunction: %s", string(body))
+
 		if err != nil {
 			return err
 		}

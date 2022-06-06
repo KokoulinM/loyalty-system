@@ -269,6 +269,7 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
