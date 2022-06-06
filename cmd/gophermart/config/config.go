@@ -9,7 +9,7 @@ import (
 
 const (
 	ServerAddress              = ":8080"
-	DataBaseURI                = ""
+	DataBaseURI                = "postgres://postgres:postgres@localhost:5432/gophermartdb?sslmode=disable"
 	AccrualSystemAddress       = ""
 	AccessTokenSecret          = ""
 	RefreshTokenSecret         = ""
@@ -19,7 +19,7 @@ const (
 
 type Config struct {
 	ServerAddress        string `env:"RUN_ADDRESS"`
-	DataBaseURI          string `env:"DATABASE_URI"`
+	DataBase             ConfigDatabase
 	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	Token                ConfigToken
 }
@@ -31,14 +31,29 @@ type ConfigToken struct {
 	RefreshTokenLiveTimeDays   int    `env:"REFRESH_TOKEN_LIVE_TIME_DAYS"`
 }
 
-func New() Config {
+type ConfigDatabase struct {
+	DataBaseURI string `env:"DATABASE_URI"`
+}
+
+func New() *Config {
+	dbCfg := ConfigDatabase{
+		DataBaseURI: DataBaseURI,
+	}
+
+	tokenConfig := NewConfigToken()
+
 	cfg := Config{
 		ServerAddress:        ServerAddress,
-		DataBaseURI:          DataBaseURI,
+		DataBase:             dbCfg,
 		AccrualSystemAddress: AccrualSystemAddress,
 	}
 
-	err := env.Parse(&cfg)
+	err := env.Parse(&cfg.DataBase)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = env.Parse(&cfg)
 	if err != nil {
 		log.Fatalf("an error occurred during parsing Config: %s", err)
 	}
@@ -48,23 +63,21 @@ func New() Config {
 	}
 
 	if checkExists("d") {
-		flag.StringVar(&cfg.DataBaseURI, "d", cfg.DataBaseURI, "DataBaseURI")
+		flag.StringVar(&cfg.DataBase.DataBaseURI, "d", cfg.DataBase.DataBaseURI, "DataBaseURI")
 	}
 
 	if checkExists("r") {
 		flag.StringVar(&cfg.AccrualSystemAddress, "r", cfg.AccrualSystemAddress, "AccrualSystemAddress")
 	}
 
-	tokenConfig := newConfigToken()
-
 	cfg.Token = tokenConfig
 
 	flag.Parse()
 
-	return cfg
+	return &cfg
 }
 
-func newConfigToken() ConfigToken {
+func NewConfigToken() ConfigToken {
 	cfg := ConfigToken{
 		AccessTokenSecret:          AccessTokenSecret,
 		RefreshTokenSecret:         RefreshTokenSecret,
