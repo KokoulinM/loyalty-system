@@ -245,13 +245,13 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	w.WriteHeader(http.StatusOK)
-
 	_, err = w.Write(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+
+	w.WriteHeader(http.StatusOK)
 }
