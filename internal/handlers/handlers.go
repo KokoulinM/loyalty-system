@@ -245,8 +245,6 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("GetOrders")
 
-	r.Header.Add("Content-Length", "0")
-
 	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
