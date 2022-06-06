@@ -34,10 +34,7 @@ func main() {
 
 	repo := postgres.New(db)
 
-	logger.Log("Starting setup db")
 	migratons.Migrations(db, logger)
-
-	logger.Log("Finish setup db")
 
 	handlers := handlers.New(repo, cfg)
 
