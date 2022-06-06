@@ -76,26 +76,3 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 
 	return result, nil
 }
-
-func (db *PostgresDatabase) ChangeOrderStatus(ctx context.Context, order string, status string, accrual float64) error {
-	sqlChangeOrderStatus := `UPDATE orders SET accrual = $1, status = $2 WHERE number = $3`
-	sqlAddUserBalance := `UPDATE users SET balance = balance + $1 WHERE id = $2`
-	userID, err := db.getUserByLogin(ctx, order)
-	if err != nil {
-		return err
-	}
-	tx, err := db.conn.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	_, err = tx.ExecContext(ctx, sqlChangeOrderStatus, accrual, status, order)
-	if err != nil {
-		return err
-	}
-	_, err = tx.ExecContext(ctx, sqlAddUserBalance, accrual, userID)
-	if err != nil {
-		return err
-	}
-	return tx.Commit()
-}

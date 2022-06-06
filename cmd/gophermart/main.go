@@ -14,8 +14,6 @@ import (
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/router"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/workers"
 	"github.com/rs/zerolog"
 )
 
@@ -43,17 +41,6 @@ func main() {
 	logger.Log("finish db connection")
 
 	repo := postgres.New(db)
-
-	jobStore := postgres.NewJobStore(db)
-	var listTask []tasks.TaskInterface
-	listTask = append(listTask, tasks.NewCheckOrderStatusTask(cfg.AccrualSystemAddress, logger, repo.ChangeOrderStatus))
-	taskStore := tasks.NewTaskStore(listTask)
-
-	wp := workers.New(jobStore, taskStore, &cfg.WorkerPool, logger)
-
-	go func() {
-		wp.Run(ctx)
-	}()
 
 	logger.Log("starting setup db")
 
