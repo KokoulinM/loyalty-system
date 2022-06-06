@@ -112,7 +112,7 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Authorization", "Bearer "+token.AccessToken)
+	w.Header().Add("Authorization", "Bearer "+token.AccessToken)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -153,7 +153,7 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Authorization", "Bearer "+token.AccessToken)
+	w.Header().Add("Authorization", "Bearer "+token.AccessToken)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -257,7 +257,7 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 
 	w.WriteHeader(http.StatusOK)
 
