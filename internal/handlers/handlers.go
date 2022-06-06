@@ -59,7 +59,6 @@ func New(repo Repository, cfg *config.Config) *Handlers {
 }
 
 func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
-	log.Println("Register")
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
@@ -108,7 +107,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
-	log.Println("Login")
 	r.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	user := models.User{}
@@ -150,7 +148,6 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	log.Println("CreateOrder")
 	defer r.Body.Close()
 
 	r.Header.Add("Content-Type", "text/plain")
@@ -208,16 +205,17 @@ func (h *Handlers) CreateOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetOrders")
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
-	log.Println("GetOrders")
+	log.Println("log.Println", userIDCtx)
 
 	orders, err := h.repo.GetOrders(r.Context(), userIDCtx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("log.Println", orders)
 
 	if len(orders) == 0 {
 		w.WriteHeader(http.StatusNoContent)
@@ -230,6 +228,8 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("log.Println", body)
+
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
@@ -241,7 +241,6 @@ func (h *Handlers) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetBalance")
 	userIDCtx := r.Context().Value(middlewares.UserIDCtx).(string)
 
 	userBalance, err := h.repo.GetBalance(r.Context(), userIDCtx)
@@ -268,7 +267,6 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateWithdraw(w http.ResponseWriter, r *http.Request) {
-	log.Println("CreateWithdraw")
 	defer r.Body.Close()
 
 	withdraw := models.Withdraw{}
