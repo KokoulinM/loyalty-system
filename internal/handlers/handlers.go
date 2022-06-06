@@ -93,8 +93,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Log().Msgf("Handler Register: %s", string(body))
-
 	newUser, err := h.repo.CreateUser(r.Context(), user)
 	var dbErr *ErrorWithDB
 
@@ -287,8 +285,6 @@ func (h *Handlers) GetBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
-
-	h.logger.Log().Msgf("Handler GetBalance: %s", string(body))
 
 	_, err = w.Write(body)
 	if err != nil {
