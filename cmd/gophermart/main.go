@@ -44,7 +44,7 @@ func main() {
 
 	router := router.New(handlers, &cfg)
 
-	s := server.New(ctx, router, &cfg)
+	s := server.New(ctx, router, cfg.ServerAddress)
 
 	err = s.Start()
 	if err != nil {
