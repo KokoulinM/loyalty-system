@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -8,14 +9,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 
 func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
@@ -36,6 +36,8 @@ func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
 
 	return router
 }
+
+type mockContext struct{}
 
 func TestHandlers_Register(t *testing.T) {
 	type want struct {
@@ -80,11 +82,18 @@ func TestHandlers_Register(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			router := chi.NewRouter()
+
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
-
 			cfg := config.New()
 
 			repoMock := NewMockRepository(ctrl)
@@ -92,24 +101,23 @@ func TestHandlers_Register(t *testing.T) {
 
 			h := New(repoMock, jobStoreMock, &logger, cfg)
 
-			router := newRouter(h, cfg)
+			router.Post(tt.query, h.Register)
 
-			//repoMock.CreateUser(ctx, tt.mockUser)
+			repoMock.EXPECT().CreateUser(ctx, tt.mockUser).Return(&tt.mockUser, nil)
 
-			w := httptest.NewRecorder()
-			body := strings.NewReader(tt.body)
-			req, _ := http.NewRequest(http.MethodPost, tt.query, body)
-			router.ServeHTTP(w, req)
+			router.ServeHTTP(w, r)
 
-			_, err := ioutil.ReadAll(w.Body)
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.contentType, w.Header()["Content-Type"][0])
+
+			_, err := ioutil.ReadAll(response.Body)
 			if err != nil {
 				t.Fatal(err)
 			}
-			//for _, field := range tt.want.InResponse {
-			//	assert.Contains(t, string(resBody), field)
-			//}
-			assert.Equal(t, tt.want.code, w.Code)
-			assert.Equal(t, tt.want.contentType, w.Header()["Content-Type"][0])
 		})
 	}
 }
