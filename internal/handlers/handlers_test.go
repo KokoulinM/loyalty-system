@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"context"
-	"io/ioutil"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -47,29 +46,41 @@ func TestHandlers_Register(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		query    string
-		body     string
-		mockUser models.User
-		want     want
+		name      string
+		query     string
+		body      string
+		mockError error
+		mockUser  models.User
+		want      want
 	}{
 		{
-			name:  "пользователь успешно аутентифицирован",
-			query: "/api/user/register",
-			body:  `{"login": "login", "password": "12345"}`,
+			name:      "пользователь успешно аутентифицирован",
+			query:     "/api/user/register",
+			body:      `{"login": "login", "password": "12345"}`,
+			mockError: nil,
 			mockUser: models.User{
 				Login:    "login",
 				Password: "12345",
 			},
 			want: want{
-				code:        200,
+				code:        http.StatusOK,
 				contentType: "application/json; charset=utf-8",
 			},
 		},
-		//{
-		//	name:  "неверный формат запроса",
-		//	query: "/api/user/register",
-		//},
+		{
+			name:      "неверный формат запроса",
+			query:     "/api/user/register",
+			body:      ``,
+			mockError: errors.New("the body is missing"),
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusBadRequest,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
 		//{
 		//	name:  "неверная пара логин/пароль",
 		//	query: "/api/user/register",
@@ -84,9 +95,6 @@ func TestHandlers_Register(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
 			w := httptest.NewRecorder()
-
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
 
 			router := chi.NewRouter()
 
@@ -103,21 +111,14 @@ func TestHandlers_Register(t *testing.T) {
 
 			router.Post(tt.query, h.Register)
 
-			repoMock.EXPECT().CreateUser(ctx, tt.mockUser).Return(&tt.mockUser, nil)
+			if len(tt.body) != 0 {
+				repoMock.EXPECT().CreateUser(gomock.Any(), tt.mockUser).Return(&tt.mockUser, tt.mockError)
+			}
 
 			router.ServeHTTP(w, r)
 
-			response := w.Result()
-
-			defer response.Body.Close()
-
 			assert.Equal(t, tt.want.code, w.Code)
-			assert.Equal(t, tt.want.contentType, w.Header()["Content-Type"][0])
-
-			_, err := ioutil.ReadAll(response.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
+			assert.Equal(t, tt.want.contentType, r.Header.Get("Content-Type"))
 		})
 	}
 }

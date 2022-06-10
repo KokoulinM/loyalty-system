@@ -96,8 +96,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Log().Msgf("Handler Register: %s", string(body))
-
 	newUser, err := h.repo.CreateUser(r.Context(), user)
 	var dbErr *ErrorWithDB
 
