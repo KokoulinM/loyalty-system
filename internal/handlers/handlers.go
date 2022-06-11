@@ -104,11 +104,6 @@ func (h *Handlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if errors.As(err, &dbErr) && dbErr.Title == "UndefinedTable" {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	token, err := auth.CreateToken(newUser.ID, h.cfg.Token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

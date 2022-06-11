@@ -23,7 +23,6 @@ func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
 	router.Use(middleware.Logger)
 
 	router.Route("/", func(r chi.Router) {
-		//r.Use(middlewares.JWTMiddleware(&cfg.Token), middlewares.GzipMiddleware)
 		r.Post("/api/user/register", h.Register)
 		r.Post("/api/user/login", h.Login)
 		r.Post("/api/user/orders", h.CreateOrder)
@@ -36,28 +35,29 @@ func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
 	return router
 }
 
-type mockContext struct{}
-
 func TestHandlers_Register(t *testing.T) {
 	type want struct {
 		code        int
 		response    string
 		contentType string
+		token       string
 	}
 
 	tests := []struct {
-		name      string
-		query     string
-		body      string
-		mockError error
-		mockUser  models.User
-		want      want
+		name        string
+		query       string
+		withoutBody bool
+		body        string
+		mockError   error
+		mockUser    models.User
+		want        want
 	}{
 		{
-			name:      "пользователь успешно аутентифицирован",
-			query:     "/api/user/register",
-			body:      `{"login": "login", "password": "12345"}`,
-			mockError: nil,
+			name:        "the user has been successfully authenticated",
+			query:       "/api/user/register",
+			body:        `{"login": "login", "password": "12345"}`,
+			withoutBody: false,
+			mockError:   nil,
 			mockUser: models.User{
 				Login:    "login",
 				Password: "12345",
@@ -68,10 +68,11 @@ func TestHandlers_Register(t *testing.T) {
 			},
 		},
 		{
-			name:      "неверный формат запроса",
-			query:     "/api/user/register",
-			body:      ``,
-			mockError: errors.New("the body is missing"),
+			name:        "invalid request format",
+			query:       "/api/user/register",
+			body:        ``,
+			withoutBody: true,
+			mockError:   errors.New("the body is missing"),
 			mockUser: models.User{
 				Login:    "login",
 				Password: "12345",
@@ -81,14 +82,36 @@ func TestHandlers_Register(t *testing.T) {
 				contentType: "application/json; charset=utf-8",
 			},
 		},
-		//{
-		//	name:  "неверная пара логин/пароль",
-		//	query: "/api/user/register",
-		//},
-		//{
-		//	name:  "внутренняя ошибка сервера",
-		//	query: "/api/user/register",
-		//},
+		{
+			name:        "invalid request body",
+			query:       "/api/user/register",
+			body:        `""`,
+			withoutBody: true,
+			mockError:   nil,
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusInternalServerError,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+		{
+			name:        "registration of a non-unique user",
+			query:       "/api/user/register",
+			body:        `{"login": "login", "password": "12345"}`,
+			withoutBody: false,
+			mockError:   NewErrorWithDB(errors.New("UniqConstraint"), "UniqConstraint"),
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusConflict,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -111,7 +134,7 @@ func TestHandlers_Register(t *testing.T) {
 
 			router.Post(tt.query, h.Register)
 
-			if len(tt.body) != 0 {
+			if !tt.withoutBody {
 				repoMock.EXPECT().CreateUser(gomock.Any(), tt.mockUser).Return(&tt.mockUser, tt.mockError)
 			}
 
