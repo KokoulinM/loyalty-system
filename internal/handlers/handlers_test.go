@@ -145,3 +145,113 @@ func TestHandlers_Register(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlers_Login(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		token       string
+	}
+
+	tests := []struct {
+		name        string
+		query       string
+		withoutBody bool
+		body        string
+		mockError   error
+		mockUser    models.User
+		want        want
+	}{
+		{
+			name:        "successful user authorization",
+			query:       "/api/user/login",
+			body:        `{"login": "login", "password": "12345"}`,
+			withoutBody: false,
+			mockError:   nil,
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusOK,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+		{
+			name:        "invalid request format",
+			query:       "/api/user/register",
+			body:        ``,
+			withoutBody: true,
+			mockError:   errors.New("the body is missing"),
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusBadRequest,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+		{
+			name:        "invalid request body",
+			query:       "/api/user/register",
+			body:        `""`,
+			withoutBody: true,
+			mockError:   nil,
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusInternalServerError,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+		{
+			name:        "invalid user password",
+			query:       "/api/user/register",
+			body:        `{"login": "login", "password": "12345"}`,
+			withoutBody: false,
+			mockError:   errors.New("user not found"),
+			mockUser: models.User{
+				Login:    "login",
+				Password: "12345",
+			},
+			want: want{
+				code:        http.StatusConflict,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
+			cfg := config.New()
+
+			repoMock := NewMockRepository(ctrl)
+			jobStoreMock := NewMockJobStore(ctrl)
+
+			h := New(repoMock, jobStoreMock, &logger, cfg)
+
+			router.Post(tt.query, h.Login)
+
+			if !tt.withoutBody {
+				repoMock.EXPECT().CheckPassword(gomock.Any(), tt.mockUser).Return(&tt.mockUser, tt.mockError)
+			}
+
+			router.ServeHTTP(w, r)
+
+			assert.Equal(t, tt.want.code, w.Code)
+		})
+	}
+}
