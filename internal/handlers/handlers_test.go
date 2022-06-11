@@ -8,13 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
 
 func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
