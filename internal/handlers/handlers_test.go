@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -251,6 +253,73 @@ func TestHandlers_Login(t *testing.T) {
 			}
 
 			router.ServeHTTP(w, r)
+
+			assert.Equal(t, tt.want.code, w.Code)
+		})
+	}
+}
+
+func TestHandlers_CreateOrder(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		token       string
+	}
+
+	tests := []struct {
+		name        string
+		query       string
+		withoutBody bool
+		body        string
+		mockError   error
+		mockOrder   models.Order
+		want        want
+	}{
+		{
+			name:        "successful user authorization",
+			query:       "/api/user/orders",
+			body:        "79927398713",
+			withoutBody: false,
+			mockError:   nil,
+			mockOrder: models.Order{
+				UserID: "userID",
+				Number: strconv.Itoa(79927398713),
+				Status: "NEW",
+			},
+			want: want{
+				code:        http.StatusAccepted,
+				contentType: "application/json; charset=utf-8",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
+			cfg := config.New()
+
+			repoMock := NewMockRepository(ctrl)
+			jobStoreMock := NewMockJobStore(ctrl)
+
+			h := New(repoMock, jobStoreMock, &logger, cfg)
+
+			router.Post(tt.query, h.CreateOrder)
+
+			if !tt.withoutBody {
+				repoMock.EXPECT().CreateOrder(gomock.Any(), tt.mockOrder).Return(nil)
+
+				jobStoreMock.EXPECT().AddJob(gomock.Any(), gomock.Any()).Return(nil)
+			}
+
+			router.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, "userID")))
 
 			assert.Equal(t, tt.want.code, w.Code)
 		})
