@@ -268,28 +268,67 @@ func TestHandlers_CreateOrder(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		query       string
-		withoutBody bool
-		body        string
-		mockError   error
-		mockOrder   models.Order
-		want        want
+		name      string
+		query     string
+		body      string
+		mockError error
+		mockOrder models.Order
+		want      want
 	}{
 		{
-			name:        "successful user authorization",
-			query:       "/api/user/orders",
-			body:        "79927398713",
-			withoutBody: false,
-			mockError:   nil,
+			name:      "successful user creation",
+			query:     "/api/user/orders",
+			body:      "79927398713",
+			mockError: nil,
 			mockOrder: models.Order{
 				UserID: "userID",
 				Number: strconv.Itoa(79927398713),
 				Status: "NEW",
 			},
 			want: want{
-				code:        http.StatusAccepted,
-				contentType: "application/json; charset=utf-8",
+				code: http.StatusAccepted,
+			},
+		},
+		{
+			name:      "invalid order number",
+			query:     "/api/user/orders",
+			body:      "123456789",
+			mockError: nil,
+			mockOrder: models.Order{
+				UserID: "userID",
+				Number: strconv.Itoa(79927398713),
+				Status: "NEW",
+			},
+			want: want{
+				code: http.StatusUnprocessableEntity,
+			},
+		},
+		{
+			name:      "an order already registered by you",
+			query:     "/api/user/orders",
+			body:      "79927398713",
+			mockError: NewErrorWithDB(errors.New("OrderAlreadyRegisterByYou"), "OrderAlreadyRegisterByYou"),
+			mockOrder: models.Order{
+				UserID: "userID",
+				Number: strconv.Itoa(79927398713),
+				Status: "NEW",
+			},
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+		{
+			name:      "an order already registered",
+			query:     "/api/user/orders",
+			body:      "79927398713",
+			mockError: NewErrorWithDB(errors.New("OrderAlreadyRegister"), "OrderAlreadyRegister"),
+			mockOrder: models.Order{
+				UserID: "userID",
+				Number: strconv.Itoa(79927398713),
+				Status: "NEW",
+			},
+			want: want{
+				code: http.StatusConflict,
 			},
 		},
 	}
@@ -313,11 +352,9 @@ func TestHandlers_CreateOrder(t *testing.T) {
 
 			router.Post(tt.query, h.CreateOrder)
 
-			if !tt.withoutBody {
-				repoMock.EXPECT().CreateOrder(gomock.Any(), tt.mockOrder).Return(nil)
+			repoMock.EXPECT().CreateOrder(gomock.Any(), tt.mockOrder).Return(tt.mockError).AnyTimes()
 
-				jobStoreMock.EXPECT().AddJob(gomock.Any(), gomock.Any()).Return(nil)
-			}
+			jobStoreMock.EXPECT().AddJob(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 			router.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, "userID")))
 
