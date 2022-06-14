@@ -413,7 +413,7 @@ func TestHandlers_GetOrders(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, _ := http.NewRequest(http.MethodGet, tt.query, strings.NewReader(tt.body))
+			r, _ := http.NewRequest(http.MethodGet, tt.query, nil)
 			w := httptest.NewRecorder()
 
 			router := chi.NewRouter()
@@ -523,6 +523,83 @@ func TestHandlers_GetBalance(t *testing.T) {
 			assert.Equal(t, tt.want.code, w.Code)
 			assert.Equal(t, tt.want.contentType, response.Header.Get("Content-Type"))
 			assert.Equal(t, tt.want.response, string(body), "invalid response body")
+		})
+	}
+}
+
+func TestHandlers_CreateWithdraw(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		token       string
+	}
+
+	tests := []struct {
+		name         string
+		query        string
+		body         string
+		mockError    error
+		mockWithdraw models.Withdraw
+		want         want
+	}{
+		{
+			name:      "successful creating withdraw",
+			query:     "/api/user/balance/withdraw",
+			body:      `{"order":"79927398713","sum":0}`,
+			mockError: nil,
+			mockWithdraw: models.Withdraw{
+				WithdrawOrder: models.WithdrawOrder{
+					Order: "79927398713",
+					Sum:   0,
+				},
+			},
+			want: want{
+				code: http.StatusOK,
+			},
+		},
+		{
+			name:      "successful creating withdraw",
+			query:     "/api/user/balance/withdraw",
+			body:      `{"order":"79927398713","sum":0}`,
+			mockError: NewErrorWithDB(errors.New("NotEnoughBalanceForWithdraw"), "NotEnoughBalanceForWithdraw"),
+			mockWithdraw: models.Withdraw{
+				WithdrawOrder: models.WithdrawOrder{
+					Order: "79927398713",
+					Sum:   0,
+				},
+			},
+			want: want{
+				code: http.StatusPaymentRequired,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodPost, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
+			cfg := config.New()
+
+			repoMock := NewMockRepository(ctrl)
+			jobStoreMock := NewMockJobStore(ctrl)
+
+			h := New(repoMock, jobStoreMock, &logger, cfg)
+
+			router.Post(tt.query, h.CreateWithdraw)
+
+			repoMock.EXPECT().CreateWithdraw(gomock.Any(), tt.mockWithdraw, "userID").Return(tt.mockError).AnyTimes()
+
+			router.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, "userID")))
+
+			assert.Equal(t, tt.want.code, w.Code)
 		})
 	}
 }
