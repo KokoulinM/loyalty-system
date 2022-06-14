@@ -603,3 +603,78 @@ func TestHandlers_CreateWithdraw(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlers_GetWithdrawals(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		token       string
+	}
+
+	tests := []struct {
+		name          string
+		query         string
+		body          string
+		mockError     error
+		mockWithdraws []models.WithdrawOrder
+		want          want
+	}{
+		{
+			name:          "successful receipt withdrawals",
+			query:         "/api/user/balance/withdrawals",
+			mockError:     nil,
+			mockWithdraws: []models.WithdrawOrder{models.WithdrawOrder{}},
+			want: want{
+				code:        http.StatusOK,
+				contentType: "application/json",
+				response:    `[{"order":"","sum":0,"processed_at":"0001-01-01T00:00:00Z"}]`,
+			},
+		},
+		{
+			name:          "no content",
+			query:         "/api/user/balance/withdrawals",
+			mockError:     nil,
+			mockWithdraws: []models.WithdrawOrder{},
+			want: want{
+				code:     http.StatusNoContent,
+				response: ``,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodGet, tt.query, strings.NewReader(tt.body))
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
+			cfg := config.New()
+
+			repoMock := NewMockRepository(ctrl)
+			jobStoreMock := NewMockJobStore(ctrl)
+
+			h := New(repoMock, jobStoreMock, &logger, cfg)
+
+			router.Get(tt.query, h.GetWithdrawals)
+
+			repoMock.EXPECT().GetWithdrawals(gomock.Any(), "userID").Return(tt.mockWithdraws, tt.mockError).AnyTimes()
+
+			router.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, "userID")))
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.contentType, response.Header.Get("Content-Type"))
+			assert.Equal(t, tt.want.response, string(body), "invalid response body")
+		})
+	}
+}
