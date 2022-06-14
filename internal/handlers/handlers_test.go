@@ -447,3 +447,82 @@ func TestHandlers_GetOrders(t *testing.T) {
 		})
 	}
 }
+
+func TestHandlers_GetBalance(t *testing.T) {
+	type want struct {
+		code        int
+		response    string
+		contentType string
+		token       string
+	}
+
+	tests := []struct {
+		name        string
+		query       string
+		body        string
+		mockError   error
+		mockBalance models.UserBalance
+		want        want
+	}{
+		{
+			name:        "successful receipt of balance",
+			query:       "/api/user/balance",
+			mockBalance: models.UserBalance{},
+			mockError:   nil,
+			want: want{
+				code:        http.StatusOK,
+				contentType: "application/json; charset=utf-8",
+				response:    `{"current":0,"withdrawn":0}`,
+			},
+		},
+		{
+			name:  "unsuccessful receipt of balance",
+			query: "/api/user/balance",
+			mockBalance: models.UserBalance{
+				Balance: 0,
+				Spent:   0,
+			},
+			mockError: errors.New(""),
+			want: want{
+				code:        http.StatusInternalServerError,
+				contentType: "text/plain; charset=utf-8",
+				response:    "\n",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r, _ := http.NewRequest(http.MethodGet, tt.query, nil)
+			w := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			logger := zerolog.New(os.Stdout).Level(zerolog.DebugLevel)
+			cfg := config.New()
+
+			repoMock := NewMockRepository(ctrl)
+			jobStoreMock := NewMockJobStore(ctrl)
+
+			h := New(repoMock, jobStoreMock, &logger, cfg)
+
+			router.Get(tt.query, h.GetBalance)
+
+			repoMock.EXPECT().GetBalance(gomock.Any(), "userID").Return(tt.mockBalance, tt.mockError).AnyTimes()
+
+			router.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), UserIDCtx, "userID")))
+
+			response := w.Result()
+
+			defer response.Body.Close()
+
+			body, _ := ioutil.ReadAll(response.Body)
+
+			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(t, tt.want.contentType, response.Header.Get("Content-Type"))
+			assert.Equal(t, tt.want.response, string(body), "invalid response body")
+		})
+	}
+}
