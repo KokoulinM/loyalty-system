@@ -67,6 +67,9 @@ func (db *PostgresDatabase) GetWithdrawals(ctx context.Context, userID string) (
 
 		withdrawals = append(withdrawals, withdraw)
 	}
+	if err := rows.Err(); err != nil {
+		return withdrawals, err
+	}
 
 	return withdrawals, nil
 }

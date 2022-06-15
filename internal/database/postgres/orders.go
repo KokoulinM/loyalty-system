@@ -75,6 +75,9 @@ func (db *PostgresDatabase) GetOrders(ctx context.Context, userID string) ([]mod
 
 		result = append(result, order)
 	}
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
 
 	return result, nil
 }
