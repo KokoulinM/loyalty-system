@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -20,24 +19,6 @@ import (
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
 	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 )
-
-func newRouter(h *Handlers, cfg *config.Config) *chi.Mux {
-	router := chi.NewRouter()
-
-	router.Use(middleware.Logger)
-
-	router.Route("/", func(r chi.Router) {
-		r.Post("/api/user/register", h.Register)
-		r.Post("/api/user/login", h.Login)
-		r.Post("/api/user/orders", h.CreateOrder)
-		r.Get("/api/user/orders", h.GetOrders)
-		r.Get("/api/user/balance", h.GetBalance)
-		r.Post("/api/user/balance/withdraw", h.CreateWithdraw)
-		r.Get("/api/user/balance/withdrawals", h.GetWithdrawals)
-	})
-
-	return router
-}
 
 func TestHandlers_Register(t *testing.T) {
 	type want struct {
