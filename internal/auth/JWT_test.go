@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
 )
 
 func TestCreateToken(t *testing.T) {

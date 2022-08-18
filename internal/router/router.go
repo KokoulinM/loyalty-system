@@ -4,9 +4,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/middlewares"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/middlewares"
 )
 
 func New(h *handlers.Handlers, cfg *config.Config) *chi.Mux {

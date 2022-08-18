@@ -1,4 +1,4 @@
-module github.com/KokoulinM/go-musthave-diploma-tpl
+module github.com/mkokoulin/go-musthave-diploma-tpl
 
 go 1.18
 

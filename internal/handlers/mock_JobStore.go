@@ -4,8 +4,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	models "github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	gomock "github.com/golang/mock/gomock"
+	models "github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
 )
 
 // MockJobStore is a mock of JobStore interface.

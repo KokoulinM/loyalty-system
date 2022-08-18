@@ -8,9 +8,9 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/tasks"
 )
 
 type WorkerPoolJobStore interface {

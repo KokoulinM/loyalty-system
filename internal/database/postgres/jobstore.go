@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/utils"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/utils"
 )
 
 type JobStore struct {

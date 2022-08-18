@@ -8,13 +8,13 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/database/postgres"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/router"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/server"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/tasks"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/workers"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/database/postgres"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/router"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/server"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/tasks"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/workers"
 )
 
 func main() {

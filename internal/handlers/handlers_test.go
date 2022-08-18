@@ -16,8 +16,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
 )
 
 func TestHandlers_Register(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/handlers"
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/handlers"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
 )
 
 func (db *PostgresDatabase) CreateWithdraw(ctx context.Context, withdraw models.Withdraw, userID string) error {

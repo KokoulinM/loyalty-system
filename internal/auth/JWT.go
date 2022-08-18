@@ -10,7 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/config"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/config"
 )
 
 type TokenDetails struct {

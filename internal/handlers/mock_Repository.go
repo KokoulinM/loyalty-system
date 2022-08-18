@@ -4,8 +4,8 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/KokoulinM/go-musthave-diploma-tpl/internal/models"
 	"github.com/golang/mock/gomock"
+	"github.com/mkokoulin/go-musthave-diploma-tpl/internal/models"
 )
 
 // MockRepository is a mock of Repository interface.
